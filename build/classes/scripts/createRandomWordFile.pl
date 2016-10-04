@@ -8,7 +8,7 @@ use List::Util qw/shuffle/;
 my $wordlist = '/usr/share/dict/words';
 
 my $length = 7;
-my $numwords = 10;
+my $numwords = 500;
 
 my @words;
 

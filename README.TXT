@@ -47,9 +47,31 @@ Build id: 20130225-0426
 To Compile and Run: 
 
 I open the project and the MasterGUI.java file. Right click in the MasterGUI.java file and select "Run As" and then select "Java Application".
-As of now, I am building and running in NetBeans because my employer heavily uses that IDE. I have run this application in Eclipse by copying the files into Eclipse, deleting the *.form files and then running as described above.  
+As of now, I am building and running in NetBeans because my employer heavily uses that IDE. I have run this application in Eclipse by copying the files into Eclipse, deleting the *.form files and then running as described above. 
+
+You should be able to generate a file with the script located at ./src/scripts/createRandomWordFile.pl. To do so, do the following: 
+
+perl createRandomWordFile.pl > FILENAME.txt
+
+The application should let you do the following: 
+
+1. Open a file
+2. Save a file
+3. Exit
+4. Encode and encrypt a file with the Simple Encryption and RSA methods.
+5. Decode and decrypt a file with the Simple Encryption and RSA methods.
+6. Enter text to be encode.
+7. Enter binary to be decode (from the input you provided in 6)
+ 
+
+
+###############################################################################
+###############################################################################
 
 NOTE, below is a dump of the Eclispe Installation Details Configuration page:
+
+###############################################################################
+###############################################################################
 
 *** Date: Sunday, September 25, 2016 5:47:37 PM Eastern Daylight Time
 
