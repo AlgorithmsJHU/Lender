@@ -1,8 +1,0 @@
-pushd .
-cd src
-javac GUI.java
-mv GUI\$* ../bin
-mv GUI.c* ../bin
-cd ../bin
-java GUI
-popd
