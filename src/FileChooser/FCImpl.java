@@ -121,69 +121,69 @@ public class FCImpl extends javax.swing.JFrame {
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			File file = fc.getSelectedFile();
 			try {
-			  // What to do with the file, e.g. display it in a TextArea
-			  textArea.read( new FileReader( file.getAbsolutePath() ), null );
+				// What to do with the file, e.g. display it in a TextArea
+				textArea.read(new FileReader(file.getAbsolutePath()), null);
 			} catch (IOException ex) {
-			  System.out.println("problem accessing file"+file.getAbsolutePath());
+				System.out.println("problem accessing file" + file.getAbsolutePath());
 			}
 		} else {
 			System.out.println("File access cancelled by user.");
 		}
     }//GEN-LAST:event_OpenActionPerformed
 
-    class CustomFilter extends javax.swing.filechooser.FileFilter {
-		
-        @Override
-        public boolean accept(File file) {
-            // Allow only directories, or files with ".txt" extension
-            return file.isDirectory() || file.getAbsolutePath().endsWith(".txt");
-        }
-		
-        @Override
-        public String getDescription() {
-            // This description will be displayed in the dialog,
-            // hard-coded = ugly, should be done via I18N
-            return "Text documents (*.txt)";
-        }
-    }
-	
+	class CustomFilter extends javax.swing.filechooser.FileFilter {
+
+		@Override
+		public boolean accept(File file) {
+			// Allow only directories, or files with ".txt" extension
+			return file.isDirectory() || file.getAbsolutePath().endsWith(".txt");
+		}
+
+		@Override
+		public String getDescription() {
+			// This description will be displayed in the dialog,
+			// hard-coded = ugly, should be done via I18N
+			return "Text documents (*.txt)";
+		}
+	}
+
     private void saveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveActionPerformed
-	      int returnVal = fc.showSaveDialog(save);
-	      if (returnVal == JFileChooser.APPROVE_OPTION) {
-			  try {
-				  String fileName = fc.getSelectedFile().getName();
-				  
-				  // set the current directory
-				  fc.setCurrentDirectory(fc.getCurrentDirectory());
-				  FileWriter fw = new FileWriter(fc.getSelectedFile().getName());
-				  
-				  // read the file and save to the file name the user chose
-				  String content = textArea.getText();
-				  writeFile(fileName, content);
-				  
-				  
-			  } catch (IOException ex) {
-				  Logger.getLogger(FCImpl.class.getName()).log(Level.SEVERE, null, ex);
-			  }
-	      } else {
-	        System.out.println("File access cancelled by user.");
-	      }
+		int returnVal = fc.showSaveDialog(save);
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			try {
+				String fileName = fc.getSelectedFile().getName();
+
+				// set the current directory
+				fc.setCurrentDirectory(fc.getCurrentDirectory());
+				FileWriter fw = new FileWriter(fc.getSelectedFile().getName());
+
+				// read the file and save to the file name the user chose
+				String content = textArea.getText();
+				writeFile(fileName, content);
+
+			} catch (IOException ex) {
+				Logger.getLogger(FCImpl.class.getName()).log(Level.SEVERE, null, ex);
+			}
+		} else {
+			System.out.println("File access cancelled by user.");
+		}
     }//GEN-LAST:event_saveActionPerformed
 
 	/**
 	 * Save the given text to the given filename.
+	 *
 	 * @param canonicalFilename Like /Users/al/foo/bar.txt
 	 * @param text All the text you want to save to the file as one String.
 	 * @throws IOException
 	 */
 	public static void writeFile(String canonicalFilename, String text) throws IOException {
-	  File file = new File (canonicalFilename);
-	  BufferedWriter out = new BufferedWriter(new FileWriter(file)); 
-	  
-	  out.write(text);
-	  out.close();
+		File file = new File(canonicalFilename);
+		BufferedWriter out = new BufferedWriter(new FileWriter(file));
+
+		out.write(text);
+		out.close();
 	}
-	
+
 	/**
 	 *
 	 * @param fileName
@@ -206,9 +206,9 @@ public class FCImpl extends javax.swing.JFrame {
 			br.close();
 		}
 	}
-	
+
     private void exitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitActionPerformed
-        System.exit(0);
+		System.exit(0);
     }//GEN-LAST:event_exitActionPerformed
 
 	/**
@@ -216,7 +216,7 @@ public class FCImpl extends javax.swing.JFrame {
 	 */
 	public static void main(String args[]) {
 		/* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+		//<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
 		 * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
 		 */
@@ -236,7 +236,7 @@ public class FCImpl extends javax.swing.JFrame {
 		} catch (javax.swing.UnsupportedLookAndFeelException ex) {
 			java.util.logging.Logger.getLogger(FCImpl.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
 		}
-        //</editor-fold>
+		//</editor-fold>
 
 		/* Create and display the form */
 		java.awt.EventQueue.invokeLater(new Runnable() {

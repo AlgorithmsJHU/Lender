@@ -5,12 +5,11 @@ package Huffman;
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 import CompressionRatio.CompressionRatio;
 import Encryption.RSA;
 import Encryption.SimpleEncryptor;
+import Utils.BitStringToByte;
 import WordChecker.WordChecker;
-import java.awt.Graphics;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -19,10 +18,12 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
@@ -38,35 +39,45 @@ public class MasterGUI extends javax.swing.JFrame {
 	private Tree tree = new Tree();
 	private HuffmanTree huffmanTree = new HuffmanTree();
 	private HuffmanCode hc = new HuffmanCode();
-	
+
 	// Simple encryption key and tool
 	private String key = "simpleKey";
 	private SimpleEncryptor simpleEncryptor = new SimpleEncryptor();
 	
+	// bit to byte
+	BitStringToByte bitStringToByte = new BitStringToByte();
+
 	// Rsa encryption tool
 	private RSA rsaEncryptor = new RSA();
 	private ObjectInputStream inputStream;
 	private final PublicKey publicKeyRSA;
 	private final PrivateKey privateKey;
-	
+
 	// non-visible FileChooser
 	private javax.swing.JFileChooser fc;
-	
+
 	// compression ratio 
 	private CompressionRatio compressionRatio = new CompressionRatio();
-	
+
 	// word checker
 	private WordChecker wordChecker = new WordChecker();
-	
+
 	// booleans for encryption types
 	private boolean simple = true;
 	private boolean rsa = false;
 	private boolean publicKey = false;
 	
+	ArrayList<byte[]> tempByteList = new ArrayList<byte[]>();
+
 	/**
 	 * Creates new form MasterGUI
 	 */
 	public MasterGUI() throws IOException, ClassNotFoundException {
+
+		// init components
+		initComponents();
+		initComponentsFromFCImpl();
+		
 		
 		// Check if the pair of keys are present else generate those.
 		if (!rsaEncryptor.areKeysPresent()) {
@@ -82,51 +93,94 @@ public class MasterGUI extends javax.swing.JFrame {
 		// Decrypt the cipher text using the private key.
 		inputStream = new ObjectInputStream(new FileInputStream(rsaEncryptor.KEY_DIRECTORY + rsaEncryptor.PRIVATE_KEY_FILE));
 		privateKey = (PrivateKey) inputStream.readObject();
+
+		String text = "bibless\n" +
+					  "pickeer\n" +
+					  "alecost\n" +
+					  "Morelos\n" +
+					  "fragile\n" +
+					  "isogyre\n" +
+					  "startor\n" +
+					  "knouted\n" +
+					  "tribuna\n" +
+					  "Osswald";
 		
-		String text = "LENDER";
-		rsaEncryptor.encrypt(text, publicKeyRSA);
+		text = encode(text);
 		
-		JOptionPane.showMessageDialog(null, 
-			  "\"" + text + "\"" + " is encrypted to: " + rsaEncryptor.encrypt(text, publicKeyRSA) /*+ "\n is decrypted to: " + rsaEncryptor.decrypt(text.getBytes(), privateKey)*/,
-			  "Encrypted/Decrypted Tester", JOptionPane.INFORMATION_MESSAGE);
+		ArrayList<byte[]> b = rsaEncryptor.encrypt(text, publicKeyRSA);
+		ArrayList<byte[]> ans = new ArrayList<byte[]>();
+		ArrayList<byte[]> holder = new ArrayList<byte[]>();
+		String yes = "";
 		
-		// init components
-		initComponents();
-		initComponentsFromFCImpl();
+		for (byte[] blah : b) {
+			ans = (rsaEncryptor.decrypt(blah, privateKey));
+			for (byte[] by : ans) {
+				holder.add(by);
+			}
+		}
 		
+		String result = "";
+		for (byte[] bb : holder) {
+			for (byte BYTE : bb) {
+				byte tempByte = BYTE;
+				result += String.format("%8s", Integer.toBinaryString(tempByte & 0xFF)).replace(' ', '0');
+			}
+			
+		}
+		
+		
+		List<String> tempStringList = bitStringToByte.splitEqually(result, 8);
+		String real = "";
+		for (String s : tempStringList) {
+			int charCode = Integer.parseInt(s, 2);
+			String str = new Character((char)charCode).toString();
+			real += str;
+		}
+		
+		yes += hc.decode(real, tree);
+		
+		
+		
+
+		JOptionPane.showMessageDialog(null,
+				"\"" + text + "\"" + " is encrypted to: " + rsaEncryptor.encrypt(text, publicKeyRSA) + "\n is decrypted to: " + yes,
+				"Encrypted/Decrypted Tester", JOptionPane.INFORMATION_MESSAGE);
+
+
+
 	}
-	
+
 	/**
-	 * 
+	 *
 	 */
-    class CustomFilter extends javax.swing.filechooser.FileFilter {
-		
-        @Override
-        public boolean accept(File file) {
-            // Allow only directories, or files with ".txt" extension
-            return file.isDirectory() || file.getAbsolutePath().endsWith(".txt");
-        }
-		
-        @Override
-        public String getDescription() {
-            // This description will be displayed in the dialog,
-            // hard-coded = ugly, should be done via I18N
-            return "Text documents (*.txt)";
-        }
-    }
-	
-	private void initComponentsFromFCImpl(){
-        fc = new javax.swing.JFileChooser();
-        fc.setFileFilter(new CustomFilter());
-		
+	class CustomFilter extends javax.swing.filechooser.FileFilter {
+
+		@Override
+		public boolean accept(File file) {
+			// Allow only directories, or files with ".txt" extension
+			return file.isDirectory() || file.getAbsolutePath().endsWith(".txt");
+		}
+
+		@Override
+		public String getDescription() {
+			// This description will be displayed in the dialog,
+			// hard-coded = ugly, should be done via I18N
+			return "Text documents (*.txt)";
+		}
+	}
+
+	private void initComponentsFromFCImpl() {
+		fc = new javax.swing.JFileChooser();
+		fc.setFileFilter(new CustomFilter());
+
 		// add the buttons to the group
 		encryptionType.add(simpleEncryptionType);
 		encryptionType.add(rsaType);
 		encryptionType.add(publicKeyCryptoSystemType);
-		
+
 		// enable the first selection upon start
 		encryptionType.setSelected(simpleEncryptionType.getModel(), rsa);
-		
+
 	}
 
 	/**
@@ -288,8 +342,7 @@ public class MasterGUI extends javax.swing.JFrame {
                                 .addGap(18, 18, 18)
                                 .addComponent(rsaType)
                                 .addGap(18, 18, 18)
-                                .addComponent(publicKeyCryptoSystemType)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addComponent(publicKeyCryptoSystemType))
                             .addComponent(treeViewer, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addGap(24, 24, 24))
         );
@@ -297,13 +350,14 @@ public class MasterGUI extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(51, 51, 51)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(decodeDecrypt, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(encodeEncrypt, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(simpleEncryptionType)
                         .addComponent(rsaType)
-                        .addComponent(publicKeyCryptoSystemType)))
+                        .addComponent(publicKeyCryptoSystemType))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(decodeDecrypt, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(encodeEncrypt, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(treeViewer, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -331,59 +385,57 @@ public class MasterGUI extends javax.swing.JFrame {
 
 	private String encode(String text) {
 		String codes[];
-		
-        // we will assume that all our characters will have
-        // code less than 256, for simplicity
-        int[] charFreqs = new int[256];
-        // read each character and record the frequencies
-        for (char c : text.toCharArray())
-            charFreqs[c]++;
-		
+
+		// we will assume that all our characters will have
+		// code less than 256, for simplicity
+		int[] charFreqs = new int[256];
+		// read each character and record the frequencies
+		for (char c : text.toCharArray()) {
+			charFreqs[c]++;
+		}
+
 		// build tree
 		huffmanTree = hc.buildTree(charFreqs);
-		
+
 		tree = treeView.getHuffmanTree(charFreqs);
 		treeView.setTree(tree);
-		
+
 		// add the treeViwer, so that we can see the tree
 		treeViewer.add(treeView);
-		
+
 		if (text.length() == 0) {
-			JOptionPane.showMessageDialog(null, "No text" );   
+			JOptionPane.showMessageDialog(null, "No text");
 			return "";
 		} else {
 			codes = hc.getCode(tree.root);
 			//JOptionPane.showMessageDialog(null, 
 			//  "\"" + text + "\"" + " is encoded to: " + hc.encode(text, codes),
 			//  "Encoded Text to Bits", JOptionPane.INFORMATION_MESSAGE);
-			
+
 			return hc.encode(text, codes);
 		}
-		
+
 	}
-	
+
     private void decodeDecryptBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_decodeDecryptBtnActionPerformed
-        String bits = decodeDecryptText.getText();
+		String bits = decodeDecryptText.getText();
 
 		if (tree == null) {
-		  JOptionPane.showMessageDialog(null, "No tree" );          
-		}
-		else if (bits.length() == 0) {
-		  JOptionPane.showMessageDialog(null, "No codes" );
-		}
-		else {
-		  String text = hc.decode(bits, tree);
-		  if (text == null) {
-			JOptionPane.showMessageDialog(null, "Incorrect bits ");            
-		  }
-		  else {
-			  System.out.println();
-		  }
+			JOptionPane.showMessageDialog(null, "No tree");
+		} else if (bits.length() == 0) {
+			JOptionPane.showMessageDialog(null, "No codes");
+		} else {
+			String text = hc.decode(bits, tree);
+			if (text == null) {
+				JOptionPane.showMessageDialog(null, "Incorrect bits ");
+			} else {
+				System.out.println();
+			}
 			//JOptionPane.showMessageDialog(null, 
 			//  bits + ": is decoded to " + "\"" + text + "\"",
 			//  "Decoded Bits to Text", JOptionPane.INFORMATION_MESSAGE);
 		}
-		
+
     }//GEN-LAST:event_decodeDecryptBtnActionPerformed
 
     private void OpenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_OpenActionPerformed
@@ -391,11 +443,11 @@ public class MasterGUI extends javax.swing.JFrame {
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			File file = fc.getSelectedFile();
 			try {
-			  // What to do with the file (i.e. display it in a textArea)
-			  textArea.read( new FileReader( file.getAbsolutePath() ), null );
-			  
+				// What to do with the file (i.e. display it in a textArea)
+				textArea.read(new FileReader(file.getAbsolutePath()), null);
+
 			} catch (IOException ex) {
-			  System.out.println("problem accessing file"+file.getAbsolutePath());
+				System.out.println("problem accessing file" + file.getAbsolutePath());
 			}
 		} else {
 			System.out.println("File access cancelled by user.");
@@ -403,25 +455,25 @@ public class MasterGUI extends javax.swing.JFrame {
     }//GEN-LAST:event_OpenActionPerformed
 
     private void saveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveActionPerformed
-	      int returnVal = fc.showSaveDialog(save);
-	      if (returnVal == JFileChooser.APPROVE_OPTION) {
-			  try {
-				  String fileName = fc.getSelectedFile().getName();
-				  
-				  // set the current directory
-				  fc.setCurrentDirectory(fc.getCurrentDirectory());
-				  FileWriter fw = new FileWriter(fc.getSelectedFile().getName());
-				  
-				  // read the file and save to the file name the user chose
-				  String content = textArea.getText();
-				  writeFile(fileName, content);
-				  
-			  } catch (IOException ex) {
-				  Logger.getLogger(MasterGUI.class.getName()).log(Level.SEVERE, null, ex);
-			  }
-	      } else {
-	        System.out.println("File access cancelled by user.");
-	      }
+		int returnVal = fc.showSaveDialog(save);
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			try {
+				String fileName = fc.getSelectedFile().getName();
+
+				// set the current directory
+				fc.setCurrentDirectory(fc.getCurrentDirectory());
+				FileWriter fw = new FileWriter(fc.getSelectedFile().getName());
+
+				// read the file and save to the file name the user chose
+				String content = textArea.getText();
+				writeFile(fileName, content);
+
+			} catch (IOException ex) {
+				Logger.getLogger(MasterGUI.class.getName()).log(Level.SEVERE, null, ex);
+			}
+		} else {
+			System.out.println("File access cancelled by user.");
+		}
     }//GEN-LAST:event_saveActionPerformed
 
     private void ExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ExitActionPerformed
@@ -432,7 +484,7 @@ public class MasterGUI extends javax.swing.JFrame {
 		FileWriter fw = null;
 		try {
 			if (null != textArea.getText()) {
-			
+
 				// set the compression data
 				compressionRatio.setUncompressed(textArea.getText().length());
 				String encodedText = encode(textArea.getText());
@@ -444,10 +496,10 @@ public class MasterGUI extends javax.swing.JFrame {
 				if (simpleEncryptionType.isSelected()) {
 					encryptionText = simpleEncryptor.encrypt(key, encodedText);
 				} else if (rsaType.isSelected()) {
-					ArrayList<byte[]> tempByteList = new ArrayList<byte[]>();
+					
 					tempByteList.addAll(rsaEncryptor.encrypt(encodedText, publicKeyRSA));
 					String result = "";
-					
+
 					for (byte[] b : tempByteList) {
 						for (byte BYTE : b) {
 							byte tempByte = BYTE;
@@ -455,8 +507,21 @@ public class MasterGUI extends javax.swing.JFrame {
 						}
 					}
 					
-					encryptionText = result;
+					List<String> tempStringList = bitStringToByte.splitEqually(result, 8);
+					String finalResult = "";
 					
+					for (String s : tempStringList) {
+						byte[] b = new BigInteger(s, 2).toByteArray();
+						
+						for (byte B : b) {
+							Character c = (char) B;
+							finalResult += c;
+						}
+					}
+					
+
+					encryptionText = finalResult;
+
 				} else if (publicKeyCryptoSystemType.isSelected()) {
 					encryptionText = simpleEncryptor.encrypt(key, encodedText);
 				} else {
@@ -473,25 +538,23 @@ public class MasterGUI extends javax.swing.JFrame {
 				if (wordChecker.checkIfFileExists(fc.getSelectedFile().getName())) {
 					// TODO - LENDER - convert from string of byte arrays to bits
 					if (rsaType.isSelected()) {
-						File tmpFile = new File(fc.getSelectedFile().getName()+".bak");
-						writeFile(tmpFile.getName(), encodedText);
+						File tmpFile = new File(fc.getSelectedFile().getName() + ".bak");
+						writeFile(tmpFile.getName(), encryptionText);
 						// Display the compression ratio to the user
 						JOptionPane.showMessageDialog(null,
-													  "The compression ratio is: " + compressionRatio.getUncompressed() + " / " + compressionRatio.getCompressed() + " = "+ compressionRatio.determinCompressionRatio(), 
-													  "Compression Ratio",
-													  JOptionPane.INFORMATION_MESSAGE);
-
+								"The compression ratio is: " + compressionRatio.getUncompressed() + " / " + compressionRatio.getCompressed() + " = " + compressionRatio.determinCompressionRatio(),
+								"Compression Ratio",
+								JOptionPane.INFORMATION_MESSAGE);
 
 						tmpFile.renameTo(fc.getSelectedFile());
 					} else {
-						File tmpFile = new File(fc.getSelectedFile().getName()+".bak");
-						writeFile(tmpFile.getName(), encodedText);
+						File tmpFile = new File(fc.getSelectedFile().getName() + ".bak");
+						writeFile(tmpFile.getName(), encryptionText);
 						// Display the compression ratio to the user
 						JOptionPane.showMessageDialog(null,
-													  "The compression ratio is: " + compressionRatio.getUncompressed() + " / " + compressionRatio.getCompressed() + " = "+ compressionRatio.determinCompressionRatio(), 
-													  "Compression Ratio",
-													  JOptionPane.INFORMATION_MESSAGE);
-
+								"The compression ratio is: " + compressionRatio.getUncompressed() + " / " + compressionRatio.getCompressed() + " = " + compressionRatio.determinCompressionRatio(),
+								"Compression Ratio",
+								JOptionPane.INFORMATION_MESSAGE);
 
 						tmpFile.renameTo(fc.getSelectedFile());
 					}
@@ -499,7 +562,7 @@ public class MasterGUI extends javax.swing.JFrame {
 					writeFile(fileName, encodedText);
 				}
 			}
-			
+
 		} catch (IOException ex) {
 			Logger.getLogger(MasterGUI.class.getName()).log(Level.SEVERE, null, ex);
 		} finally {
@@ -514,55 +577,90 @@ public class MasterGUI extends javax.swing.JFrame {
     }//GEN-LAST:event_encodeEncryptActionPerformed
 
     private void decodeDecryptActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_decodeDecryptActionPerformed
-        FileWriter fw = null;
+		FileWriter fw = null;
+		ArrayList<byte[]> byteList = new ArrayList<byte[]>();
+		ArrayList<byte[]> realByteList = new ArrayList<byte[]>();
 		String bits = textArea.getText();
+		String decryptionText = "";
 
 		if (tree == null) {
-			JOptionPane.showMessageDialog(null, "No tree" );          
+			JOptionPane.showMessageDialog(null, "No tree");
 		} else if (bits.length() == 0) {
-			JOptionPane.showMessageDialog(null, "No codes" );
+			JOptionPane.showMessageDialog(null, "No codes");
 		} else {
-			
-			String decryptionText ;
-			// this is a temporary if statement that will be set to true
-			// it is going to determine which decryption method we will use later on
-			if (simpleEncryptionType.isSelected()) {
-				decryptionText = simpleEncryptor.decrypt(key, bits);
-			} else if (rsaType.isSelected()) {
-				decryptionText = rsaEncryptor.decrypt(bits.getBytes(), privateKey);
+
+				
+				// this is a temporary if statement that will be set to true
+				// it is going to determine which decryption method we will use later on
+				if (simpleEncryptionType.isSelected()) {
+					decryptionText = simpleEncryptor.decrypt(key, bits);
+				} else if (rsaType.isSelected()) {
+					
+					
+				ArrayList<byte[]> ans = new ArrayList<byte[]>();
+				ArrayList<byte[]> holder = new ArrayList<byte[]>();
+				String yes = "";
+
+				for (byte[] blah : tempByteList) {
+					ans = (rsaEncryptor.decrypt(blah, privateKey));
+					for (byte[] by : ans) {
+						holder.add(by);
+					}
+				}
+
+				String result = "";
+				for (byte[] bb : holder) {
+					for (byte BYTE : bb) {
+						byte tempByte = BYTE;
+						result += String.format("%8s", Integer.toBinaryString(tempByte & 0xFF)).replace(' ', '0');
+					}
+
+				}
+
+				List<String> tempStringList = bitStringToByte.splitEqually(result, 8);
+				String real = "";
+				for (String s : tempStringList) {
+					int charCode = Integer.parseInt(s, 2);
+					String str = new Character((char)charCode).toString();
+					real += str;
+				}
+
+				decryptionText += hc.decode(real, tree);
+
 			} else if (publicKeyCryptoSystemType.isSelected()) {
 				decryptionText = simpleEncryptor.decrypt(key, bits);
 			} else {
 				decryptionText = simpleEncryptor.decrypt(key, bits);
 			}
 			
-			String text = hc.decode(decryptionText, tree);
-				if (text == null) {
-					JOptionPane.showMessageDialog(null, "Incorrect bits ");            
-				} else {
-					try {
-						//JOptionPane.showMessageDialog(null,
-						//		bits + ": is decoded to " + "\"" + text + "\"",
-						//		"Decoded Bits to Text", JOptionPane.INFORMATION_MESSAGE);
-						
-						textArea.setText(text);
-						
-						String fileName = fc.getSelectedFile().getName();
-						// set the current directory
-						fc.setCurrentDirectory(fc.getCurrentDirectory());
-						fw = new FileWriter(fc.getSelectedFile().getName());
-						// write the file, write to bak then rename
-						if (wordChecker.checkIfFileExists(fc.getSelectedFile().getName())) {
-							File tmpFile = new File(fileName+".bak");
-							writeFile(tmpFile.getName(), text);
-							tmpFile.renameTo(fc.getSelectedFile());
-						} else {
-							writeFile(fileName, text);
-						}
-					} catch (IOException ex) {
-						Logger.getLogger(MasterGUI.class.getName()).log(Level.SEVERE, null, ex);
+			String text = decryptionText;
+			
+			if (text == null) {
+				JOptionPane.showMessageDialog(null, "Incorrect bits ");
+			} else {
+				try {
+					//JOptionPane.showMessageDialog(null,
+					//		bits + ": is decoded to " + "\"" + text + "\"",
+					//		"Decoded Bits to Text", JOptionPane.INFORMATION_MESSAGE);
+
+					textArea.setText(text);
+
+					String fileName = fc.getSelectedFile().getName();
+					// set the current directory
+					fc.setCurrentDirectory(fc.getCurrentDirectory());
+					fw = new FileWriter(fc.getSelectedFile().getName());
+					// write the file, write to bak then rename
+					if (wordChecker.checkIfFileExists(fc.getSelectedFile().getName())) {
+						File tmpFile = new File(fileName + ".bak");
+						writeFile(tmpFile.getName(), text);
+						tmpFile.renameTo(fc.getSelectedFile());
+					} else {
+						writeFile(fileName, text);
 					}
+				} catch (IOException ex) {
+					Logger.getLogger(MasterGUI.class.getName()).log(Level.SEVERE, null, ex);
 				}
+			}
 		}
     }//GEN-LAST:event_decodeDecryptActionPerformed
 
@@ -570,26 +668,27 @@ public class MasterGUI extends javax.swing.JFrame {
     }//GEN-LAST:event_simpleEncryptionTypeActionPerformed
 
     private void rsaTypeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rsaTypeActionPerformed
-        // TODO add your handling code here:
+		// TODO add your handling code here:
     }//GEN-LAST:event_rsaTypeActionPerformed
 
     private void publicKeyCryptoSystemTypeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_publicKeyCryptoSystemTypeActionPerformed
-        // TODO add your handling code here:
+		// TODO add your handling code here:
     }//GEN-LAST:event_publicKeyCryptoSystemTypeActionPerformed
 
 	/**
 	 * Save the given text to the given filename.
+	 *
 	 * @param canonicalFilename Like /home/garrett/git/Code/blah.txt
 	 * @param text All the text you want to save to the file as one String.
 	 * @throws IOException
 	 */
 	public static void writeFile(String canonicalFilename, String text) throws IOException {
-		File file = new File (canonicalFilename);
+		File file = new File(canonicalFilename);
 		try (BufferedWriter out = new BufferedWriter(new FileWriter(file))) {
 			out.write(text);
 		}
 	}
-	
+
 	/**
 	 *
 	 * @param fileName
@@ -609,13 +708,13 @@ public class MasterGUI extends javax.swing.JFrame {
 			return sb.toString();
 		}
 	}
-	
+
 	/**
 	 * @param args the command line arguments
 	 */
 	public static void main(String args[]) {
 		/* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+		//<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
 		 * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
 		 */
@@ -635,7 +734,7 @@ public class MasterGUI extends javax.swing.JFrame {
 		} catch (javax.swing.UnsupportedLookAndFeelException ex) {
 			java.util.logging.Logger.getLogger(MasterGUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
 		}
-        //</editor-fold>
+		//</editor-fold>
 
 		/* Create and display the form */
 		java.awt.EventQueue.invokeLater(() -> {

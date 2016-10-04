@@ -10,30 +10,31 @@ package CompressionRatio;
  * @author glender
  */
 public class CompressionRatio {
-	
+
 	private double uncompressed;
 	private double compressed;
-	
-	public CompressionRatio() {}
-	
+
+	public CompressionRatio() {
+	}
+
 	public void setCompressed(double compressedSize) {
 		this.compressed = compressedSize;
 	}
-	
+
 	public void setUncompressed(double uncompressedSize) {
 		this.uncompressed = uncompressedSize;
 	}
-	
+
 	public double determinCompressionRatio() {
 		return uncompressed / compressed;
 	}
-	
+
 	public double getCompressed() {
 		return this.compressed;
 	}
-	
+
 	public double getUncompressed() {
 		return this.uncompressed;
 	}
-	
+
 }

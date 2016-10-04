@@ -15,49 +15,50 @@ import java.io.IOException;
  * @author glender
  */
 public class WordChecker {
-	
+
 	/**
 	 *
 	 */
-	public WordChecker() {}
-	
+	public WordChecker() {
+	}
+
 	/**
 	 *
 	 * @param word
 	 * @return
 	 */
 	public boolean checkForWord(String word) {
-		
-        try {
-            BufferedReader in = new BufferedReader(new FileReader(
-                "/usr/share/dict/words"));
-            String str;
-            while ((str = in.readLine()) != null) {
-                if (str.contains(word)) {
-                    return true;
-                }
-            }
-            in.close();
-        } catch (IOException e) {
-			System.out.println("LENDER -- error with checking if words are in file");
-        }
 
-        return false;
-    }
-	
+		try {
+			BufferedReader in = new BufferedReader(new FileReader(
+					"/usr/share/dict/words"));
+			String str;
+			while ((str = in.readLine()) != null) {
+				if (str.contains(word)) {
+					return true;
+				}
+			}
+			in.close();
+		} catch (IOException e) {
+			System.out.println("LENDER -- error with checking if words are in file");
+		}
+
+		return false;
+	}
+
 	/**
 	 *
 	 * @return
 	 */
 	public boolean checkIfFileExists() {
 		File f = new File("/usr/share/dict/words");
-		if(!f.exists() && !f.isDirectory()) { 
+		if (!f.exists() && !f.isDirectory()) {
 			return false;
 		}
-		
+
 		return true;
 	}
-	
+
 	/**
 	 *
 	 * @param file
@@ -65,10 +66,10 @@ public class WordChecker {
 	 */
 	public boolean checkIfFileExists(String file) {
 		File f = new File(file);
-		if(!f.exists() && !f.isDirectory()) { 
+		if (!f.exists() && !f.isDirectory()) {
 			return false;
 		}
-		
+
 		return true;
 	}
 
