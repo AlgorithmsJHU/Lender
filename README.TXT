@@ -1,4 +1,42 @@
-Files in project : GUI.java
+Files in project :
+
+./LICENSE
+./build.xml
+./key/private.key
+./key/public.key
+./manifest.mf
+./rando.txt
+./src/FileChooser/FileChooser.java
+./src/FileChooser/FileChooser.form
+./src/FileChooser/FCImpl.java
+./src/FileChooser/FCImpl.form
+./src/WordChecker/WordChecker.java
+./src/Encryption/Encryptor.java
+./src/Encryption/SimpleEncryptor.java
+./src/Encryption/RSA.java
+./src/Huffman/MasterGUI.java
+./src/Huffman/MasterGUI.form
+./src/Huffman/TreeView.java
+./src/Huffman/HuffmanTree.java
+./src/Huffman/HuffmanCode.java
+./src/Huffman/Tree.java
+./src/Huffman/Heap.java
+./src/CompressionRatio/CompressionRatio.java
+./src/scripts/build
+./src/scripts/textFile.txt
+./src/scripts/backup
+./src/scripts/rando.txt
+./src/scripts/createRandomWordFile.pl
+./src/scripts/backup.txt
+./src/LZW/LZW.java
+./src/Utils/BitStringToByte.java
+./src/Utils/Utilities.java
+./textFile.txt
+./build/built-jar.properties
+./dist/README.TXT
+./dist/LenderPA1.jar
+./build.sh
+./README.TXT
 
 Java Version is 1.8, as detailed below.
 
@@ -8,17 +46,10 @@ Build id: 20130225-0426
 
 To Compile and Run: 
 
-I open the projecta and the GUI.java file. Right click in the GUI.java file and select "Run As" and then select "Java Application". You can then use the GUI to open a file for compression/encryption or for decompression/decryption. As of now, it does not compress/encrypt/decompress/decrypt the files. It only saves them as a different name. Where this will be done in GUI.java is noted by comments.
-
-OR
-
-Via command line, navigate to where the project is located. Run the scrip build by issuing the command "./build". This will build the code and run the application.  
-
+I open the project and the MasterGUI.java file. Right click in the MasterGUI.java file and select "Run As" and then select "Java Application".
+As of now, I am building and running in NetBeans because my employer heavily uses that IDE. I have run this application in Eclipse by copying the files into Eclipse, deleting the *.form files and then running as described above.  
 
 NOTE, below is a dump of the Eclispe Installation Details Configuration page:
-
-
-
 
 *** Date: Sunday, September 25, 2016 5:47:37 PM Eastern Daylight Time
 

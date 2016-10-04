@@ -94,59 +94,53 @@ public class MasterGUI extends javax.swing.JFrame {
 		inputStream = new ObjectInputStream(new FileInputStream(rsaEncryptor.KEY_DIRECTORY + rsaEncryptor.PRIVATE_KEY_FILE));
 		privateKey = (PrivateKey) inputStream.readObject();
 
-		String text = "bibless\n" +
-					  "pickeer\n" +
-					  "alecost\n" +
-					  "Morelos\n" +
-					  "fragile\n" +
-					  "isogyre\n" +
-					  "startor\n" +
-					  "knouted\n" +
-					  "tribuna\n" +
-					  "Osswald";
-		
-		text = encode(text);
-		
-		ArrayList<byte[]> b = rsaEncryptor.encrypt(text, publicKeyRSA);
-		ArrayList<byte[]> ans = new ArrayList<byte[]>();
-		ArrayList<byte[]> holder = new ArrayList<byte[]>();
-		String yes = "";
-		
-		for (byte[] blah : b) {
-			ans = (rsaEncryptor.decrypt(blah, privateKey));
-			for (byte[] by : ans) {
-				holder.add(by);
-			}
-		}
-		
-		String result = "";
-		for (byte[] bb : holder) {
-			for (byte BYTE : bb) {
-				byte tempByte = BYTE;
-				result += String.format("%8s", Integer.toBinaryString(tempByte & 0xFF)).replace(' ', '0');
-			}
-			
-		}
-		
-		
-		List<String> tempStringList = bitStringToByte.splitEqually(result, 8);
-		String real = "";
-		for (String s : tempStringList) {
-			int charCode = Integer.parseInt(s, 2);
-			String str = new Character((char)charCode).toString();
-			real += str;
-		}
-		
-		yes += hc.decode(real, tree);
-		
-		
-		
-
-		JOptionPane.showMessageDialog(null,
-				"\"" + text + "\"" + " is encrypted to: " + rsaEncryptor.encrypt(text, publicKeyRSA) + "\n is decrypted to: " + yes,
-				"Encrypted/Decrypted Tester", JOptionPane.INFORMATION_MESSAGE);
-
-
+//		String text = "bibless\n"
+//				+ "pickeer\n"
+//				+ "alecost\n"
+//				+ "Morelos\n"
+//				+ "fragile\n"
+//				+ "isogyre\n"
+//				+ "startor\n"
+//				+ "knouted\n"
+//				+ "tribuna\n"
+//				+ "Osswald";
+//
+//		text = encode(text);
+//
+//		ArrayList<byte[]> b = rsaEncryptor.encrypt(text, publicKeyRSA);
+//		ArrayList<byte[]> ans = new ArrayList<byte[]>();
+//		ArrayList<byte[]> holder = new ArrayList<byte[]>();
+//		String yes = "";
+//
+//		for (byte[] blah : b) {
+//			ans = (rsaEncryptor.decrypt(blah, privateKey));
+//			for (byte[] by : ans) {
+//				holder.add(by);
+//			}
+//		}
+//
+//		String result = "";
+//		for (byte[] bb : holder) {
+//			for (byte BYTE : bb) {
+//				byte tempByte = BYTE;
+//				result += String.format("%8s", Integer.toBinaryString(tempByte & 0xFF)).replace(' ', '0');
+//			}
+//
+//		}
+//
+//		List<String> tempStringList = bitStringToByte.splitEqually(result, 8);
+//		String real = "";
+//		for (String s : tempStringList) {
+//			int charCode = Integer.parseInt(s, 2);
+//			String str = new Character((char) charCode).toString();
+//			real += str;
+//		}
+//
+//		yes += hc.decode(real, tree);
+//
+//		JOptionPane.showMessageDialog(null,
+//				"\"" + text + "\"" + " is encrypted to: " + rsaEncryptor.encrypt(text, publicKeyRSA) + "\n is decrypted to: " + yes,
+//				"Encrypted/Decrypted Tester", JOptionPane.INFORMATION_MESSAGE);
 
 	}
 
