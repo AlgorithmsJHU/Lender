@@ -1,4 +1,4 @@
-package Huffman;
+package GUI;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -6,8 +6,14 @@ package Huffman;
  * and open the template in the editor.
  */
 import CompressionRatio.CompressionRatio;
+import Encryption.PKCryptosys;
 import Encryption.RSA;
 import Encryption.SimpleEncryptor;
+import Huffman.HuffmanCode;
+import Huffman.HuffmanTree;
+import Huffman.Tree;
+import Huffman.TreeView;
+import LZW.LZW;
 import Utils.BitStringToByte;
 import WordChecker.WordChecker;
 import java.io.BufferedReader;
@@ -26,6 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.crypto.SecretKey;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
@@ -43,6 +50,11 @@ public class MasterGUI extends javax.swing.JFrame {
 	// Simple encryption key and tool
 	private String key = "simpleKey";
 	private SimpleEncryptor simpleEncryptor = new SimpleEncryptor();
+        
+        // PublicKey encryption tool and keys
+        private PKCryptosys pkCryptosys = new PKCryptosys();
+        SecretKey pk1;
+        SecretKey pk2;
 	
 	// bit to byte
 	BitStringToByte bitStringToByte = new BitStringToByte();
@@ -66,6 +78,17 @@ public class MasterGUI extends javax.swing.JFrame {
 	private boolean simple = true;
 	private boolean rsa = false;
 	private boolean publicKey = false;
+        
+        // booleans for IO types
+        private boolean text = true;
+        private boolean binary = false;
+        
+        // booleans for encoding/decoding types
+        private boolean huffman = true;
+        private boolean lzw = false;
+        
+        // encoding / decoding for LZW
+        private LZW lzwEnDe = new LZW();
 	
 	ArrayList<byte[]> tempByteList = new ArrayList<byte[]>();
 
@@ -74,25 +97,28 @@ public class MasterGUI extends javax.swing.JFrame {
 	 */
 	public MasterGUI() throws IOException, ClassNotFoundException {
 
-		// init components
-		initComponents();
-		initComponentsFromFCImpl();
-		
-		
-		// Check if the pair of keys are present else generate those.
-		if (!rsaEncryptor.areKeysPresent()) {
-			// Method generates a pair of keys using the RSA algorithm and stores it
-			// in their respective files
-			rsaEncryptor.generateKey();
-		}
+            // init components
+            initComponents();
+            initComponentsFromFCImpl();
+            
+            // generate the keys for the Public-Key Cryptosystem
+            pk1 = pkCryptosys.generateKey();
+            pk2 = pkCryptosys.generateKey();
 
-		// Encrypt the string using the public key
-		inputStream = new ObjectInputStream(new FileInputStream(rsaEncryptor.KEY_DIRECTORY + rsaEncryptor.PUBLIC_KEY_FILE));
-		publicKeyRSA = (PublicKey) inputStream.readObject();
+            // Check if the pair of keys are present else generate those.
+            if (!rsaEncryptor.areKeysPresent()) {
+                    // Method generates a pair of keys using the RSA algorithm and stores it
+                    // in their respective files
+                    rsaEncryptor.generateKey();
+            }
 
-		// Decrypt the cipher text using the private key.
-		inputStream = new ObjectInputStream(new FileInputStream(rsaEncryptor.KEY_DIRECTORY + rsaEncryptor.PRIVATE_KEY_FILE));
-		privateKey = (PrivateKey) inputStream.readObject();
+            // Encrypt the string using the public key
+            inputStream = new ObjectInputStream(new FileInputStream(rsaEncryptor.KEY_DIRECTORY + rsaEncryptor.PUBLIC_KEY_FILE));
+            publicKeyRSA = (PublicKey) inputStream.readObject();
+
+            // Decrypt the cipher text using the private key.
+            inputStream = new ObjectInputStream(new FileInputStream(rsaEncryptor.KEY_DIRECTORY + rsaEncryptor.PRIVATE_KEY_FILE));
+            privateKey = (PrivateKey) inputStream.readObject();
 
 //		String text = "bibless\n"
 //				+ "pickeer\n"
@@ -171,9 +197,26 @@ public class MasterGUI extends javax.swing.JFrame {
 		encryptionType.add(simpleEncryptionType);
 		encryptionType.add(rsaType);
 		encryptionType.add(publicKeyCryptoSystemType);
+                
+                // add the buttons to the group
+                IOType.add(textBtn);
+                IOType.add(binaryBtn);
+                
+                // add the buttons to the group
+                codingType.add(huffmanBtn);
+                codingType.add(lzwBtn);
 
 		// enable the first selection upon start
 		encryptionType.setSelected(simpleEncryptionType.getModel(), rsa);
+                simpleEncryptionType.setSelected(rsa);
+                
+                // enable the first selection upon start
+                IOType.setSelected(textBtn.getModel(), text);
+                textBtn.setSelected(text);
+                
+                // enable the first selection upon start
+                codingType.setSelected(huffmanBtn.getModel(), huffman);
+                huffmanBtn.setSelected(huffman);
 
 	}
 
@@ -187,6 +230,8 @@ public class MasterGUI extends javax.swing.JFrame {
     private void initComponents() {
 
         encryptionType = new javax.swing.ButtonGroup();
+        IOType = new javax.swing.ButtonGroup();
+        codingType = new javax.swing.ButtonGroup();
         encodeEncryptBtn = new javax.swing.JButton();
         textToEncodeEcrypt = new javax.swing.JTextField();
         decodeDecryptText = new javax.swing.JTextField();
@@ -199,6 +244,13 @@ public class MasterGUI extends javax.swing.JFrame {
         simpleEncryptionType = new javax.swing.JRadioButton();
         rsaType = new javax.swing.JRadioButton();
         publicKeyCryptoSystemType = new javax.swing.JRadioButton();
+        textBtn = new javax.swing.JRadioButton();
+        binaryBtn = new javax.swing.JRadioButton();
+        jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        huffmanBtn = new javax.swing.JRadioButton();
+        lzwBtn = new javax.swing.JRadioButton();
+        jLabel3 = new javax.swing.JLabel();
         menuBar = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         Open = new javax.swing.JMenuItem();
@@ -274,6 +326,20 @@ public class MasterGUI extends javax.swing.JFrame {
             }
         });
 
+        textBtn.setText("Text");
+
+        binaryBtn.setText("Binary");
+
+        jLabel1.setText("Encryption Type");
+
+        jLabel2.setText("I/O:");
+
+        huffmanBtn.setText("Huffman");
+
+        lzwBtn.setText("LZW");
+
+        jLabel3.setText("Encode / Decode Type:");
+
         jMenu1.setText("File");
 
         Open.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.event.InputEvent.CTRL_MASK));
@@ -321,41 +387,66 @@ public class MasterGUI extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(decodeDecryptText, javax.swing.GroupLayout.PREFERRED_SIZE, 415, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(decodeDecryptBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(decodeDecryptBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(5, 5, 5))
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 591, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(encodeEncrypt, javax.swing.GroupLayout.PREFERRED_SIZE, 153, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(18, 18, 18)
-                                .addComponent(decodeDecrypt, javax.swing.GroupLayout.PREFERRED_SIZE, 153, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(decodeDecrypt, javax.swing.GroupLayout.PREFERRED_SIZE, 153, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jLabel1))
+                            .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.TRAILING))
+                        .addGap(18, 18, 18)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(treeViewer, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(simpleEncryptionType)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(simpleEncryptionType)
+                                    .addComponent(huffmanBtn))
                                 .addGap(18, 18, 18)
-                                .addComponent(rsaType)
-                                .addGap(18, 18, 18)
-                                .addComponent(publicKeyCryptoSystemType))
-                            .addComponent(treeViewer, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
-                .addGap(24, 24, 24))
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(rsaType)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(publicKeyCryptoSystemType)
+                                        .addGap(39, 39, 39)
+                                        .addComponent(jLabel2)
+                                        .addGap(3, 3, 3)
+                                        .addComponent(textBtn)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(binaryBtn))
+                                    .addComponent(lzwBtn))
+                                .addGap(0, 0, Short.MAX_VALUE)))))
+                .addGap(19, 19, 19))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(51, 51, 51)
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(huffmanBtn)
+                    .addComponent(lzwBtn)
+                    .addComponent(jLabel3))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(simpleEncryptionType)
                         .addComponent(rsaType)
-                        .addComponent(publicKeyCryptoSystemType))
+                        .addComponent(publicKeyCryptoSystemType)
+                        .addComponent(textBtn)
+                        .addComponent(binaryBtn)
+                        .addComponent(jLabel1)
+                        .addComponent(jLabel2))
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(decodeDecrypt, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(encodeEncrypt, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(treeViewer, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 591, Short.MAX_VALUE))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 599, Short.MAX_VALUE))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
@@ -377,39 +468,39 @@ public class MasterGUI extends javax.swing.JFrame {
 		encode(text);
     }//GEN-LAST:event_encodeEncryptBtnActionPerformed
 
-	private String encode(String text) {
-		String codes[];
+    private String encode(String text) {
+            String codes[];
 
-		// we will assume that all our characters will have
-		// code less than 256, for simplicity
-		int[] charFreqs = new int[256];
-		// read each character and record the frequencies
-		for (char c : text.toCharArray()) {
-			charFreqs[c]++;
-		}
+            // we will assume that all our characters will have
+            // code less than 256, for simplicity
+            int[] charFreqs = new int[256];
+            // read each character and record the frequencies
+            for (char c : text.toCharArray()) {
+                    charFreqs[c]++;
+            }
 
-		// build tree
-		huffmanTree = hc.buildTree(charFreqs);
+            // build tree
+            huffmanTree = hc.buildTree(charFreqs);
 
-		tree = treeView.getHuffmanTree(charFreqs);
-		treeView.setTree(tree);
+            tree = treeView.getHuffmanTree(charFreqs);
+            treeView.setTree(tree);
 
-		// add the treeViwer, so that we can see the tree
-		treeViewer.add(treeView);
+            // add the treeViwer, so that we can see the tree
+            treeViewer.add(treeView);
 
-		if (text.length() == 0) {
-			JOptionPane.showMessageDialog(null, "No text");
-			return "";
-		} else {
-			codes = hc.getCode(tree.root);
-			//JOptionPane.showMessageDialog(null, 
-			//  "\"" + text + "\"" + " is encoded to: " + hc.encode(text, codes),
-			//  "Encoded Text to Bits", JOptionPane.INFORMATION_MESSAGE);
+            if (text.length() == 0) {
+                    JOptionPane.showMessageDialog(null, "No text");
+                    return "";
+            } else {
+                    codes = hc.getCode(tree.root);
+                    //JOptionPane.showMessageDialog(null, 
+                    //  "\"" + text + "\"" + " is encoded to: " + hc.encode(text, codes),
+                    //  "Encoded Text to Bits", JOptionPane.INFORMATION_MESSAGE);
 
-			return hc.encode(text, codes);
-		}
+                    return hc.encode(text, codes);
+            }
 
-	}
+    }
 
     private void decodeDecryptBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_decodeDecryptBtnActionPerformed
 		String bits = decodeDecryptText.getText();
@@ -477,185 +568,258 @@ public class MasterGUI extends javax.swing.JFrame {
     private void encodeEncryptActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_encodeEncryptActionPerformed
 		FileWriter fw = null;
 		try {
-			if (null != textArea.getText()) {
+                    if (null != textArea.getText()) {
 
-				// set the compression data
-				compressionRatio.setUncompressed(textArea.getText().length());
-				String encodedText = encode(textArea.getText());
-				compressionRatio.setCompressed(encodedText.length());
+                        // set the compression data
+                        compressionRatio.setUncompressed(textArea.getText().length());
+                        
+                        String encodedText ="";
+                        // which encoding method should we use? 
+                        if (huffmanBtn.isSelected()) {
+                            encodedText = encode(textArea.getText());
+                        } else {
+                            List<Integer> lzwList = new ArrayList<Integer>();
+                            lzwList = lzwEnDe.compress(textArea.getText());
+                            
+                            // create the encoded string from the encoded list of integers
+                            for (Integer integer : lzwList) {
+                                encodedText += integer.toString();
+                            }
+                            
+                        }
+                        
+                        compressionRatio.setCompressed(encodedText.length());
 
-				String encryptionText;
-				// this is a temporary if statement that will be set to true
-				// it is going to determine which decryption method we will use later on
-				if (simpleEncryptionType.isSelected()) {
-					encryptionText = simpleEncryptor.encrypt(key, encodedText);
-				} else if (rsaType.isSelected()) {
-					
-					tempByteList.addAll(rsaEncryptor.encrypt(encodedText, publicKeyRSA));
-					String result = "";
+                        String encryptionText = "";
+                        // which encryption method should we use? 
+                        if (simpleEncryptionType.isSelected()) {
+                            encryptionText = simpleEncryptor.encrypt(key, encodedText);
+                        } else if (rsaType.isSelected()) {
 
-					for (byte[] b : tempByteList) {
-						for (byte BYTE : b) {
-							byte tempByte = BYTE;
-							result += String.format("%8s", Integer.toBinaryString(tempByte & 0xFF)).replace(' ', '0');
-						}
-					}
-					
-					List<String> tempStringList = bitStringToByte.splitEqually(result, 8);
-					String finalResult = "";
-					
-					for (String s : tempStringList) {
-						byte[] b = new BigInteger(s, 2).toByteArray();
-						
-						for (byte B : b) {
-							Character c = (char) B;
-							finalResult += c;
-						}
-					}
-					
+                            tempByteList.addAll(rsaEncryptor.encrypt(encodedText, publicKeyRSA));
+                            String result = "";
 
-					encryptionText = finalResult;
+                            for (byte[] b : tempByteList) {
+                                    for (byte BYTE : b) {
+                                            byte tempByte = BYTE;
+                                            result += String.format("%8s", Integer.toBinaryString(tempByte & 0xFF)).replace(' ', '0');
+                                    }
+                            }
 
-				} else if (publicKeyCryptoSystemType.isSelected()) {
-					encryptionText = simpleEncryptor.encrypt(key, encodedText);
-				} else {
-					encryptionText = simpleEncryptor.encrypt(key, encodedText);
-				}
+                            List<String> tempStringList = bitStringToByte.splitEqually(result, 8);
+                            String finalResult = "";
 
-				textArea.setText(encryptionText);
+                            for (String s : tempStringList) {
+                                    byte[] b = new BigInteger(s, 2).toByteArray();
 
-				String fileName = fc.getSelectedFile().getName();
-				// set the current directory
-				fc.setCurrentDirectory(fc.getCurrentDirectory());
-				fw = new FileWriter(fc.getSelectedFile().getName());
-				// write the file
-				if (wordChecker.checkIfFileExists(fc.getSelectedFile().getName())) {
-					// TODO - LENDER - convert from string of byte arrays to bits
-					if (rsaType.isSelected()) {
-						File tmpFile = new File(fc.getSelectedFile().getName() + ".bak");
-						writeFile(tmpFile.getName(), encryptionText);
-						// Display the compression ratio to the user
-						JOptionPane.showMessageDialog(null,
-								"The compression ratio is: " + compressionRatio.getUncompressed() + " / " + compressionRatio.getCompressed() + " = " + compressionRatio.determinCompressionRatio(),
-								"Compression Ratio",
-								JOptionPane.INFORMATION_MESSAGE);
+                                    for (byte B : b) {
+                                            Character c = (char) B;
+                                            finalResult += c;
+                                    }
+                            }
 
-						tmpFile.renameTo(fc.getSelectedFile());
-					} else {
-						File tmpFile = new File(fc.getSelectedFile().getName() + ".bak");
-						writeFile(tmpFile.getName(), encryptionText);
-						// Display the compression ratio to the user
-						JOptionPane.showMessageDialog(null,
-								"The compression ratio is: " + compressionRatio.getUncompressed() + " / " + compressionRatio.getCompressed() + " = " + compressionRatio.determinCompressionRatio(),
-								"Compression Ratio",
-								JOptionPane.INFORMATION_MESSAGE);
 
-						tmpFile.renameTo(fc.getSelectedFile());
-					}
-				} else {
-					writeFile(fileName, encodedText);
-				}
-			}
+                            encryptionText = finalResult;
+
+                        } else if (publicKeyCryptoSystemType.isSelected()) {
+                            
+                            // encrypt, decrypt, encrypt. This is our encryption method for multiple keys
+                            byte[] firstEncryption = pkCryptosys.Encryption(encodedText.getBytes("UTF-8"), pk1, false);
+                            byte[] decryption = pkCryptosys.Decryption(firstEncryption, pk2, true);
+                            byte[] secondEncryption = pkCryptosys.Encryption(decryption, pk1, true);
+                            
+                            // add the bytes to the encryption text
+                            for (Byte b : secondEncryption) {
+                                encryptionText += b.toString();
+                            }
+                            
+                        } else {
+                            // default to the simpleEncryptor
+                            encryptionText = simpleEncryptor.encrypt(key, encodedText);
+                        }
+
+                        textArea.setText(encryptionText);
+
+                        String fileName = fc.getSelectedFile().getName();
+                        // set the current directory
+                        fc.setCurrentDirectory(fc.getCurrentDirectory());
+                        fw = new FileWriter(fc.getSelectedFile().getName());
+                        // write the file
+                        if (wordChecker.checkIfFileExists(fc.getSelectedFile().getName())) {
+                            // TODO - LENDER - convert from string of byte arrays to bits
+                            if (rsaType.isSelected()) {
+                                File tmpFile = new File(fc.getSelectedFile().getName() + ".bak");
+                                writeFile(tmpFile.getName(), encryptionText);
+                                // Display the compression ratio to the user
+                                JOptionPane.showMessageDialog(null,
+                                                "The compression ratio is: " + compressionRatio.getUncompressed() + " / " + compressionRatio.getCompressed() + " = " + compressionRatio.determinCompressionRatio(),
+                                                "Compression Ratio",
+                                                JOptionPane.INFORMATION_MESSAGE);
+
+                                tmpFile.renameTo(fc.getSelectedFile());
+                            } else {
+                                File tmpFile = new File(fc.getSelectedFile().getName() + ".bak");
+                                writeFile(tmpFile.getName(), encryptionText);
+                                // Display the compression ratio to the user
+                                JOptionPane.showMessageDialog(null,
+                                                "The compression ratio is: " + compressionRatio.getUncompressed() + " / " + compressionRatio.getCompressed() + " = " + compressionRatio.determinCompressionRatio(),
+                                                "Compression Ratio",
+                                                JOptionPane.INFORMATION_MESSAGE);
+
+                                tmpFile.renameTo(fc.getSelectedFile());
+                            }
+                        } else {
+                            writeFile(fileName, encodedText);
+                        }
+                    }
 
 		} catch (IOException ex) {
-			Logger.getLogger(MasterGUI.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(MasterGUI.class.getName()).log(Level.SEVERE, null, ex);
 		} finally {
-			try {
-				if (null != fw) {
-					fw.close();
-				}
-			} catch (IOException ex) {
-				Logger.getLogger(MasterGUI.class.getName()).log(Level.SEVERE, null, ex);
-			}
+                    try {
+                        if (null != fw) {
+                                fw.close();
+                        }
+                    } catch (IOException ex) {
+                        Logger.getLogger(MasterGUI.class.getName()).log(Level.SEVERE, null, ex);
+                    }
 		}
     }//GEN-LAST:event_encodeEncryptActionPerformed
 
     private void decodeDecryptActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_decodeDecryptActionPerformed
-		FileWriter fw = null;
-		ArrayList<byte[]> byteList = new ArrayList<byte[]>();
-		ArrayList<byte[]> realByteList = new ArrayList<byte[]>();
-		String bits = textArea.getText();
-		String decryptionText = "";
+        FileWriter fw = null;
+        ArrayList<byte[]> byteList = new ArrayList<byte[]>();
+        ArrayList<byte[]> realByteList = new ArrayList<byte[]>();
+        String bits = textArea.getText();
+        String decryptionText = "";
 
-		if (tree == null) {
-			JOptionPane.showMessageDialog(null, "No tree");
-		} else if (bits.length() == 0) {
-			JOptionPane.showMessageDialog(null, "No codes");
-		} else {
+        if (tree == null) {
+                JOptionPane.showMessageDialog(null, "No tree");
+        } else if (bits.length() == 0) {
+                JOptionPane.showMessageDialog(null, "No codes");
+        } else {
 
-				
-				// this is a temporary if statement that will be set to true
-				// it is going to determine which decryption method we will use later on
-				if (simpleEncryptionType.isSelected()) {
-					decryptionText = simpleEncryptor.decrypt(key, bits);
-				} else if (rsaType.isSelected()) {
-					
-					
-				ArrayList<byte[]> ans = new ArrayList<byte[]>();
-				ArrayList<byte[]> holder = new ArrayList<byte[]>();
-				String yes = "";
+            // which decryption method should we use?
+            if (simpleEncryptionType.isSelected()) {
+                    decryptionText = simpleEncryptor.decrypt(key, bits);
+            } else if (rsaType.isSelected()) {
 
-				for (byte[] blah : tempByteList) {
-					ans = (rsaEncryptor.decrypt(blah, privateKey));
-					for (byte[] by : ans) {
-						holder.add(by);
-					}
-				}
+                ArrayList<byte[]> ans = new ArrayList<byte[]>();
+                ArrayList<byte[]> holder = new ArrayList<byte[]>();
+                String yes = "";
 
-				String result = "";
-				for (byte[] bb : holder) {
-					for (byte BYTE : bb) {
-						byte tempByte = BYTE;
-						result += String.format("%8s", Integer.toBinaryString(tempByte & 0xFF)).replace(' ', '0');
-					}
+                for (byte[] blah : tempByteList) {
+                        ans = (rsaEncryptor.decrypt(blah, privateKey));
+                        for (byte[] by : ans) {
+                                holder.add(by);
+                        }
+                }
 
-				}
+                String result = "";
+                for (byte[] bb : holder) {
+                    for (byte BYTE : bb) {
+                        byte tempByte = BYTE;
+                        result += String.format("%8s", Integer.toBinaryString(tempByte & 0xFF)).replace(' ', '0');
+                    }
+                }
 
-				List<String> tempStringList = bitStringToByte.splitEqually(result, 8);
-				String real = "";
-				for (String s : tempStringList) {
-					int charCode = Integer.parseInt(s, 2);
-					String str = new Character((char)charCode).toString();
-					real += str;
-				}
+                List<String> tempStringList = bitStringToByte.splitEqually(result, 8);
+                String real = "";
+                for (String s : tempStringList) {
+                    int charCode = Integer.parseInt(s, 2);
+                    String str = new Character((char)charCode).toString();
+                    real += str;
+                }
 
-				decryptionText += hc.decode(real, tree);
+                if (huffmanBtn.isSelected()) {
+                    decryptionText += hc.decode(real, tree);
+                } else {
 
-			} else if (publicKeyCryptoSystemType.isSelected()) {
-				decryptionText = simpleEncryptor.decrypt(key, bits);
-			} else {
-				decryptionText = simpleEncryptor.decrypt(key, bits);
-			}
-			
-			String text = decryptionText;
-			
-			if (text == null) {
-				JOptionPane.showMessageDialog(null, "Incorrect bits ");
-			} else {
-				try {
-					//JOptionPane.showMessageDialog(null,
-					//		bits + ": is decoded to " + "\"" + text + "\"",
-					//		"Decoded Bits to Text", JOptionPane.INFORMATION_MESSAGE);
+                    List<Integer> tempList = new ArrayList<Integer>();
 
-					textArea.setText(text);
+                    for (String s : tempStringList) {
+                        int charCode = Integer.parseInt(s, 2);
+                        tempList.add(charCode);
+                    }
 
-					String fileName = fc.getSelectedFile().getName();
-					// set the current directory
-					fc.setCurrentDirectory(fc.getCurrentDirectory());
-					fw = new FileWriter(fc.getSelectedFile().getName());
-					// write the file, write to bak then rename
-					if (wordChecker.checkIfFileExists(fc.getSelectedFile().getName())) {
-						File tmpFile = new File(fileName + ".bak");
-						writeFile(tmpFile.getName(), text);
-						tmpFile.renameTo(fc.getSelectedFile());
-					} else {
-						writeFile(fileName, text);
-					}
-				} catch (IOException ex) {
-					Logger.getLogger(MasterGUI.class.getName()).log(Level.SEVERE, null, ex);
-				}
-			}
-		}
+                    decryptionText = lzwEnDe.decompress(tempList);
+                }
+
+            } else if (publicKeyCryptoSystemType.isSelected()) {
+
+                try {
+
+                    String tempHolder = "";
+                    // decrypt, encrypt, decrypt. This is our method for multiple keys.
+                    byte[] firstDecryption = pkCryptosys.Decryption(bits.getBytes("UTF-8"), pk1, true);
+                    byte[] encryption = pkCryptosys.Encryption(firstDecryption, pk2, true);
+                    byte[] secondDecryption = pkCryptosys.Decryption(encryption, pk1, false);
+
+                    // add the bits to the decryptionText
+                    for (Byte b : secondDecryption) {
+                        tempHolder += b.toString();
+                    }
+
+                    List<String> tempStringList = bitStringToByte.splitEqually(tempHolder, 8);
+                    String real = "";
+                    for (String s : tempStringList) {
+                        int charCode = Integer.parseInt(s, 2);
+                        String str = new Character((char)charCode).toString();
+                        real += str;
+                    }
+
+                    if (huffmanBtn.isSelected()) {
+                        decryptionText += hc.decode(real, tree);
+                    } else {
+
+                        List<Integer> tempList = new ArrayList<Integer>();
+
+                        for (String s : tempStringList) {
+                            int charCode = Integer.parseInt(s, 2);
+                            tempList.add(charCode);
+                        }
+
+                        decryptionText = lzwEnDe.decompress(tempList);
+                    }
+
+                } catch (UnsupportedEncodingException ex) {
+                    Logger.getLogger(MasterGUI.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+            } else {
+                // default
+                decryptionText = simpleEncryptor.decrypt(key, bits);
+            }
+
+    String text = decryptionText;
+
+    if (text == null) {
+        JOptionPane.showMessageDialog(null, "Incorrect bits ");
+    } else {
+        try {
+            //JOptionPane.showMessageDialog(null,
+            //		bits + ": is decoded to " + "\"" + text + "\"",
+            //		"Decoded Bits to Text", JOptionPane.INFORMATION_MESSAGE);
+
+            textArea.setText(text);
+
+            String fileName = fc.getSelectedFile().getName();
+            // set the current directory
+            fc.setCurrentDirectory(fc.getCurrentDirectory());
+            fw = new FileWriter(fc.getSelectedFile().getName());
+            // write the file, write to bak then rename
+            if (wordChecker.checkIfFileExists(fc.getSelectedFile().getName())) {
+                    File tmpFile = new File(fileName + ".bak");
+                    writeFile(tmpFile.getName(), text);
+                    tmpFile.renameTo(fc.getSelectedFile());
+            } else {
+                    writeFile(fileName, text);
+            }
+        } catch (IOException ex) {
+                Logger.getLogger(MasterGUI.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    }
     }//GEN-LAST:event_decodeDecryptActionPerformed
 
     private void simpleEncryptionTypeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_simpleEncryptionTypeActionPerformed
@@ -744,21 +908,30 @@ public class MasterGUI extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem Exit;
+    private javax.swing.ButtonGroup IOType;
     private javax.swing.JMenuItem Open;
+    private javax.swing.JRadioButton binaryBtn;
+    private javax.swing.ButtonGroup codingType;
     private javax.swing.JButton decodeDecrypt;
     private javax.swing.JButton decodeDecryptBtn;
     private javax.swing.JTextField decodeDecryptText;
     private javax.swing.JButton encodeEncrypt;
     private javax.swing.JButton encodeEncryptBtn;
     private javax.swing.ButtonGroup encryptionType;
+    private javax.swing.JRadioButton huffmanBtn;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JRadioButton lzwBtn;
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JRadioButton publicKeyCryptoSystemType;
     private javax.swing.JRadioButton rsaType;
     private javax.swing.JMenuItem save;
     private javax.swing.JRadioButton simpleEncryptionType;
     private javax.swing.JTextArea textArea;
+    private javax.swing.JRadioButton textBtn;
     private javax.swing.JTextField textToEncodeEcrypt;
     private java.awt.ScrollPane treeViewer;
     // End of variables declaration//GEN-END:variables

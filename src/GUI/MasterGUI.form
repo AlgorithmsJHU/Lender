@@ -4,6 +4,10 @@
   <NonVisualComponents>
     <Component class="javax.swing.ButtonGroup" name="encryptionType">
     </Component>
+    <Component class="javax.swing.ButtonGroup" name="IOType">
+    </Component>
+    <Component class="javax.swing.ButtonGroup" name="codingType">
+    </Component>
     <Menu class="javax.swing.JMenuBar" name="menuBar">
       <SubComponents>
         <Menu class="javax.swing.JMenu" name="jMenu1">
@@ -86,42 +90,71 @@
                       <Component id="decodeDecryptText" min="-2" pref="415" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="decodeDecryptBtn" min="-2" pref="250" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="5" max="-2" attributes="0"/>
                   </Group>
                   <Group type="102" alignment="0" attributes="0">
-                      <Group type="103" groupAlignment="0" attributes="0">
+                      <Group type="103" groupAlignment="0" max="-2" attributes="0">
                           <Component id="jScrollPane1" alignment="0" min="-2" pref="591" max="-2" attributes="0"/>
                           <Group type="102" alignment="0" attributes="0">
                               <Component id="encodeEncrypt" min="-2" pref="153" max="-2" attributes="0"/>
                               <EmptySpace type="separate" max="-2" attributes="0"/>
                               <Component id="decodeDecrypt" min="-2" pref="153" max="-2" attributes="0"/>
+                              <EmptySpace max="32767" attributes="0"/>
+                              <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
                           </Group>
+                          <Component id="jLabel3" alignment="1" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace max="-2" attributes="0"/>
+                      <EmptySpace type="separate" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Group type="102" attributes="0">
-                              <Component id="simpleEncryptionType" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace type="separate" max="-2" attributes="0"/>
-                              <Component id="rsaType" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace type="separate" max="-2" attributes="0"/>
-                              <Component id="publicKeyCryptoSystemType" min="-2" max="-2" attributes="0"/>
-                          </Group>
                           <Component id="treeViewer" max="32767" attributes="0"/>
+                          <Group type="102" attributes="0">
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Component id="simpleEncryptionType" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  <Component id="huffmanBtn" alignment="0" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                              <EmptySpace type="separate" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Group type="102" attributes="0">
+                                      <Component id="rsaType" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                                      <Component id="publicKeyCryptoSystemType" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace min="-2" pref="39" max="-2" attributes="0"/>
+                                      <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace min="-2" pref="3" max="-2" attributes="0"/>
+                                      <Component id="textBtn" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                                      <Component id="binaryBtn" min="-2" max="-2" attributes="0"/>
+                                  </Group>
+                                  <Component id="lzwBtn" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                          </Group>
                       </Group>
                   </Group>
               </Group>
-              <EmptySpace min="-2" pref="24" max="-2" attributes="0"/>
+              <EmptySpace min="-2" pref="19" max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
     <DimensionLayout dim="1">
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" attributes="0">
-              <EmptySpace min="-2" pref="51" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="huffmanBtn" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="lzwBtn" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="jLabel3" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="103" alignment="0" groupAlignment="3" attributes="0">
                       <Component id="simpleEncryptionType" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="rsaType" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="publicKeyCryptoSystemType" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="textBtn" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="binaryBtn" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="jLabel1" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="jLabel2" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="decodeDecrypt" alignment="3" max="32767" attributes="0"/>
@@ -131,7 +164,7 @@
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Component id="treeViewer" max="32767" attributes="0"/>
-                  <Component id="jScrollPane1" pref="591" max="32767" attributes="0"/>
+                  <Component id="jScrollPane1" pref="599" max="32767" attributes="0"/>
               </Group>
               <EmptySpace type="separate" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="1" attributes="0">
@@ -252,6 +285,41 @@
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="publicKeyCryptoSystemTypeActionPerformed"/>
       </Events>
+    </Component>
+    <Component class="javax.swing.JRadioButton" name="textBtn">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Text"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JRadioButton" name="binaryBtn">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Binary"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel1">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Encryption Type"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel2">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="I/O:"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JRadioButton" name="huffmanBtn">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Huffman"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JRadioButton" name="lzwBtn">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="LZW"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel3">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Encode / Decode Type:"/>
+      </Properties>
     </Component>
   </SubComponents>
 </Form>

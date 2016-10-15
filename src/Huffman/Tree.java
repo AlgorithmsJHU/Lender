@@ -12,7 +12,7 @@ package Huffman;
  */
 public class Tree implements Comparable<Tree> {
 
-	Node root; // The root of the tree
+	public Node root; // The root of the tree
 
 	/**
 	 * Create a tree with two subtrees
