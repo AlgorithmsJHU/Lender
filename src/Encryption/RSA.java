@@ -56,7 +56,7 @@ public class RSA {
 
 	/**
 	 * Generate key which contains a pair of private and public key using 1024
-	 * bytes. Store the set of keys in Prvate.key and Public.key files.
+	 * bytes. Store the set of keys in Private.key and Public.key files.
 	 *
 	 */
 	public void generateKey() {
