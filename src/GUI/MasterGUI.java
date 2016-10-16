@@ -170,6 +170,12 @@ public class MasterGUI extends javax.swing.JFrame {
 		codingType.setSelected(huffmanBtn.getModel(), huffman);
 		huffmanBtn.setSelected(huffman);
 		
+		// TODO -- LENDER -- make these work properly.
+		lzwBtn.setEnabled(false);
+		textBtn.setEnabled(false);
+		binaryBtn.setEnabled(false);
+		publicKeyCryptoSystemType.setEnabled(false);
+		
 	}
 
 	/**
