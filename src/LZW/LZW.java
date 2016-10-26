@@ -19,7 +19,6 @@ public class LZW {
 
 	private PKCryptosys pk = new PKCryptosys();
 	
-	
     /** Compress a string to a list of output symbols.
      * @param uncompressed
      * @return  

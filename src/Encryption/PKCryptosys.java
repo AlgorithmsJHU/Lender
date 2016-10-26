@@ -14,21 +14,23 @@ import javax.crypto.spec.SecretKeySpec;
 
 /**
  * This is the implementation of a triple DES.
+ *
  * @author glender
  */
 public class PKCryptosys {
-	
-	public void PKCryptosys() {}
-	
+
+	public void PKCryptosys() {
+	}
+
 	private final String PASSWORD = "L2EN3D5E7R";
-	
+
 	public byte[] encrypt(String message) throws Exception {
-		
+
 		// Create the password using md5, put it into byte array
 		final MessageDigest md = MessageDigest.getInstance("md5");
 		final byte[] digestOfPassword = md.digest(PASSWORD.getBytes("UTF-8"));
 		final byte[] keyBytes = Arrays.copyOf(digestOfPassword, 24);
-		
+
 		// splitting of bytes
 		for (int index = 0, subindex = 16; index < 8;) {
 			keyBytes[subindex++] = keyBytes[index++];
@@ -45,16 +47,16 @@ public class PKCryptosys {
 		final byte[] cipherText = cipher.doFinal(plainTextBytes);
 
 		return cipherText;
-		
+
 	}
 
 	public String decrypt(byte[] message) throws Exception {
-	
+
 		// Create the password using md5, put it into byte array
 		final MessageDigest md = MessageDigest.getInstance("md5");
 		final byte[] digestOfPassword = md.digest(PASSWORD.getBytes("UTF-8"));
 		final byte[] keyBytes = Arrays.copyOf(digestOfPassword, 24);
-		
+
 		// splitting of byters
 		for (int index = 0, subindex = 16; index < 8;) {
 			keyBytes[subindex++] = keyBytes[index++];
@@ -71,5 +73,5 @@ public class PKCryptosys {
 
 		return new String(plainText, "UTF-8");
 	}
-	
+
 }

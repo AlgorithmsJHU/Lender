@@ -48,12 +48,12 @@ public class MasterGUI extends javax.swing.JFrame {
 	// Simple encryption key and tool
 	private String key = "simpleKey";
 	private SimpleEncryptor simpleEncryptor = new SimpleEncryptor();
-        
+
 	// PublicKey encryption tool and keys
 	private PKCryptosys pkCryptosys = new PKCryptosys();
 	SecretKey pk1;
 	SecretKey pk2;
-	
+
 	// String splitter
 	Utilities utils = new Utilities();
 
@@ -70,7 +70,7 @@ public class MasterGUI extends javax.swing.JFrame {
 	private boolean simple = true;
 	private boolean rsa = false;
 	private boolean publicKey = false;
-        
+
 	// booleans for IO types
 	private boolean textBool = true;
 	private boolean binaryBool = false;
@@ -81,7 +81,7 @@ public class MasterGUI extends javax.swing.JFrame {
 
 	// encoding / decoding for LZW
 	private LZW lzwEnDe = new LZW();
-	
+
 	ArrayList<byte[]> tempByteList = new ArrayList<byte[]>();
 
 	/**
@@ -137,7 +137,7 @@ public class MasterGUI extends javax.swing.JFrame {
 		encryptionType.add(simpleEncryptionType);
 		encryptionType.add(rsaType);
 		encryptionType.add(publicKeyCryptoSystemType);
-                
+
 		// add the buttons to the group
 		IOType.add(textBtn);
 		IOType.add(binaryBtn);
@@ -149,7 +149,7 @@ public class MasterGUI extends javax.swing.JFrame {
 		// enable the first selection upon start
 		encryptionType.setSelected(simpleEncryptionType.getModel(), rsa);
 		simpleEncryptionType.setSelected(rsa);
-                
+
 		// enable the first selection upon start
 		IOType.setSelected(textBtn.getModel(), textBool);
 		textBtn.setSelected(textBool);
@@ -157,13 +157,13 @@ public class MasterGUI extends javax.swing.JFrame {
 		// enable the first selection upon start
 		codingType.setSelected(huffmanBtn.getModel(), huffman);
 		huffmanBtn.setSelected(huffman);
-		
+
 		// TODO -- LENDER -- make these work properly.
 		lzwBtn.setEnabled(false);
 		textBtn.setEnabled(false);
 		binaryBtn.setEnabled(false);
 		publicKeyCryptoSystemType.setEnabled(false);
-		
+
 	}
 
 	/**
@@ -414,7 +414,7 @@ public class MasterGUI extends javax.swing.JFrame {
 		encode(text);
     }//GEN-LAST:event_encodeEncryptBtnActionPerformed
 
-    private String encode(String text) {
+	private String encode(String text) {
 		String codes[];
 
 		// we will assume that all our characters will have
@@ -422,7 +422,7 @@ public class MasterGUI extends javax.swing.JFrame {
 		int[] charFreqs = new int[256];
 		// read each character and record the frequencies
 		for (char c : text.toCharArray()) {
-				charFreqs[c]++;
+			charFreqs[c]++;
 		}
 
 		// build tree
@@ -435,18 +435,14 @@ public class MasterGUI extends javax.swing.JFrame {
 		treeViewer.add(treeView);
 
 		if (text.length() == 0) {
-				JOptionPane.showMessageDialog(null, "No text");
-				return "";
+			JOptionPane.showMessageDialog(null, "No text");
+			return "";
 		} else {
-				codes = hc.getCode(tree.root);
-				//JOptionPane.showMessageDialog(null, 
-				//  "\"" + text + "\"" + " is encoded to: " + hc.encode(text, codes),
-				//  "Encoded Text to Bits", JOptionPane.INFORMATION_MESSAGE);
-
-				return hc.encode(text, codes);
+			codes = hc.getCode(tree.root);
+			return hc.encode(text, codes);
 		}
 
-    }
+	}
 
     private void decodeDecryptBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_decodeDecryptBtnActionPerformed
 		String bits = decodeDecryptText.getText();
@@ -462,9 +458,6 @@ public class MasterGUI extends javax.swing.JFrame {
 			} else {
 				System.out.println();
 			}
-			//JOptionPane.showMessageDialog(null, 
-			//  bits + ": is decoded to " + "\"" + text + "\"",
-			//  "Decoded Bits to Text", JOptionPane.INFORMATION_MESSAGE);
 		}
 
     }//GEN-LAST:event_decodeDecryptBtnActionPerformed
@@ -473,7 +466,7 @@ public class MasterGUI extends javax.swing.JFrame {
 		int returnVal = fc.showOpenDialog(this);
 		// clear the text field
 		textArea.setText("");
-		
+
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			File file = fc.getSelectedFile();
 			try {
@@ -517,18 +510,18 @@ public class MasterGUI extends javax.swing.JFrame {
     private void encodeEncryptActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_encodeEncryptActionPerformed
 		FileWriter fw = null;
 		try {
-			
+
 			if (null != textArea.getText()) {
 
 				// set the compression data
 				utils.compressionRatio.setUncompressed(textArea.getText().length());
 
-				String encodedText ="";
+				String encodedText = "";
 				// which encoding method should we use? 
 				if (huffmanBtn.isSelected()) {
 					encodedText = encode(textArea.getText());
 				} else {
-					
+
 					List<Integer> lzwList = new ArrayList<Integer>();
 					lzwList = lzwEnDe.compress(textArea.getText());
 
@@ -538,7 +531,7 @@ public class MasterGUI extends javax.swing.JFrame {
 					}
 
 				}
-                        
+
 				utils.compressionRatio.setCompressed(encodedText.length());
 
 				String encryptionText = "";
@@ -551,22 +544,22 @@ public class MasterGUI extends javax.swing.JFrame {
 					String result = "";
 
 					for (byte[] b : tempByteList) {
-							for (byte BYTE : b) {
-									byte tempByte = BYTE;
-									result += String.format("%8s", Integer.toBinaryString(tempByte & 0xFF)).replace(' ', '0');
-							}
+						for (byte BYTE : b) {
+							byte tempByte = BYTE;
+							result += String.format("%8s", Integer.toBinaryString(tempByte & 0xFF)).replace(' ', '0');
+						}
 					}
 
 					List<String> tempStringList = utils.bitStringToByte.splitEqually(result, 8);
 					String finalResult = "";
 
 					for (String s : tempStringList) {
-							byte[] b = new BigInteger(s, 2).toByteArray();
+						byte[] b = new BigInteger(s, 2).toByteArray();
 
-							for (byte B : b) {
-									Character c = (char) B;
-									finalResult += c;
-							}
+						for (byte B : b) {
+							Character c = (char) B;
+							finalResult += c;
+						}
 					}
 
 					encryptionText = finalResult;
@@ -600,9 +593,9 @@ public class MasterGUI extends javax.swing.JFrame {
 						writeFile(tmpFile.getName(), encryptionText);
 						// Display the compression ratio to the user
 						JOptionPane.showMessageDialog(null,
-										"The compression ratio is: " + utils.compressionRatio.getUncompressed() + " / " + utils.compressionRatio.getCompressed() + " = " + utils.compressionRatio.determinCompressionRatio(),
-										"Compression Ratio",
-										JOptionPane.INFORMATION_MESSAGE);
+								"The compression ratio is: " + utils.compressionRatio.getUncompressed() + " / " + utils.compressionRatio.getCompressed() + " = " + utils.compressionRatio.determinCompressionRatio(),
+								"Compression Ratio",
+								JOptionPane.INFORMATION_MESSAGE);
 
 						tmpFile.renameTo(fc.getSelectedFile());
 					} else {
@@ -610,9 +603,9 @@ public class MasterGUI extends javax.swing.JFrame {
 						writeFile(tmpFile.getName(), encryptionText);
 						// Display the compression ratio to the user
 						JOptionPane.showMessageDialog(null,
-										"The compression ratio is: " + utils.compressionRatio.getUncompressed() + " / " + utils.compressionRatio.getCompressed() + " = " + utils.compressionRatio.determinCompressionRatio(),
-										"Compression Ratio",
-										JOptionPane.INFORMATION_MESSAGE);
+								"The compression ratio is: " + utils.compressionRatio.getUncompressed() + " / " + utils.compressionRatio.getCompressed() + " = " + utils.compressionRatio.determinCompressionRatio(),
+								"Compression Ratio",
+								JOptionPane.INFORMATION_MESSAGE);
 
 						tmpFile.renameTo(fc.getSelectedFile());
 					}
@@ -622,13 +615,13 @@ public class MasterGUI extends javax.swing.JFrame {
 			}
 
 		} catch (IOException ex) {
-                    Logger.getLogger(MasterGUI.class.getName()).log(Level.SEVERE, null, ex);
+			Logger.getLogger(MasterGUI.class.getName()).log(Level.SEVERE, null, ex);
 		} catch (Exception ex) {
 			Logger.getLogger(MasterGUI.class.getName()).log(Level.SEVERE, null, ex);
 		} finally {
 			try {
 				if (null != fw) {
-						fw.close();
+					fw.close();
 				}
 			} catch (IOException ex) {
 				Logger.getLogger(MasterGUI.class.getName()).log(Level.SEVERE, null, ex);
@@ -637,39 +630,39 @@ public class MasterGUI extends javax.swing.JFrame {
     }//GEN-LAST:event_encodeEncryptActionPerformed
 
     private void decodeDecryptActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_decodeDecryptActionPerformed
-        FileWriter fw = null;
-        ArrayList<byte[]> byteList = new ArrayList<byte[]>();
-        ArrayList<byte[]> realByteList = new ArrayList<byte[]>();
-        String bits = textArea.getText();
-        String decryptionText = "";
+		FileWriter fw = null;
+		ArrayList<byte[]> byteList = new ArrayList<byte[]>();
+		ArrayList<byte[]> realByteList = new ArrayList<byte[]>();
+		String bits = textArea.getText();
+		String decryptionText = "";
 
-        if (tree == null) {
-                JOptionPane.showMessageDialog(null, "No tree");
-        } else if (bits.length() == 0) {
-                JOptionPane.showMessageDialog(null, "No codes");
-        } else {
+		if (tree == null) {
+			JOptionPane.showMessageDialog(null, "No tree");
+		} else if (bits.length() == 0) {
+			JOptionPane.showMessageDialog(null, "No codes");
+		} else {
 
-            // which decryption method should we use?
-            if (simpleEncryptionType.isSelected()) {
+			// which decryption method should we use?
+			if (simpleEncryptionType.isSelected()) {
 				decryptionText = simpleEncryptor.decrypt(key, bits);
-					
-                String result = "";
-                for (byte BYTE : decryptionText.getBytes()) {
+
+				String result = "";
+				for (byte BYTE : decryptionText.getBytes()) {
 					byte tempByte = BYTE;
 					result += String.format("%8s", Integer.toBinaryString(tempByte & 0xFF)).replace(' ', '0');
 				}
-				
+
 				List<String> tempStringList = utils.bitStringToByte.splitEqually(result, 8);
 				String real = "";
 				for (String s : tempStringList) {
 					int charCode = Integer.parseInt(s, 2);
-					String str = new Character((char)charCode).toString();
+					String str = new Character((char) charCode).toString();
 					real += str;
 				}
 
 				// clear the decryptionText
 				decryptionText = "";
-				
+
 				// which decoding method?
 				if (huffmanBtn.isSelected()) {
 					decryptionText += hc.decode(real, tree);
@@ -678,54 +671,54 @@ public class MasterGUI extends javax.swing.JFrame {
 					tempList = utils.stringSplitter.splitString(real);
 					decryptionText = lzwEnDe.decompress(tempList);
 				}
-				
-            } else if (rsaType.isSelected()) {
 
-                ArrayList<byte[]> ans = new ArrayList<byte[]>();
-                ArrayList<byte[]> holder = new ArrayList<byte[]>();
-                String yes = "";
+			} else if (rsaType.isSelected()) {
 
-                for (byte[] blah : tempByteList) {
+				ArrayList<byte[]> ans = new ArrayList<byte[]>();
+				ArrayList<byte[]> holder = new ArrayList<byte[]>();
+				String yes = "";
+
+				for (byte[] blah : tempByteList) {
 					ans = (rsaEncryptor.decrypt(blah, privateKey));
 					for (byte[] by : ans) {
-							holder.add(by);
+						holder.add(by);
 					}
-                }
+				}
 
-                String result = "";
-                for (byte[] bb : holder) {
-                    for (byte BYTE : bb) {
-                        byte tempByte = BYTE;
-                        result += String.format("%8s", Integer.toBinaryString(tempByte & 0xFF)).replace(' ', '0');
-                    }
-                }
+				String result = "";
+				for (byte[] bb : holder) {
+					for (byte BYTE : bb) {
+						byte tempByte = BYTE;
+						result += String.format("%8s", Integer.toBinaryString(tempByte & 0xFF)).replace(' ', '0');
+					}
+				}
 
-                List<String> tempStringList = utils.bitStringToByte.splitEqually(result, 8);
-                String real = "";
-                for (String s : tempStringList) {
-                    int charCode = Integer.parseInt(s, 2);
-                    String str = new Character((char)charCode).toString();
-                    real += str;
-                }
+				List<String> tempStringList = utils.bitStringToByte.splitEqually(result, 8);
+				String real = "";
+				for (String s : tempStringList) {
+					int charCode = Integer.parseInt(s, 2);
+					String str = new Character((char) charCode).toString();
+					real += str;
+				}
 
 				// which decoding method?
-                if (huffmanBtn.isSelected()) {
-                    decryptionText += hc.decode(real, tree);
-                } else {
+				if (huffmanBtn.isSelected()) {
+					decryptionText += hc.decode(real, tree);
+				} else {
 
 					List<Integer> tempList = new ArrayList<Integer>();
 					tempList = utils.stringSplitter.splitString(real);
 
-                    decryptionText = lzwEnDe.decompress(tempList);
-                }
+					decryptionText = lzwEnDe.decompress(tempList);
+				}
 
-            } else if (publicKeyCryptoSystemType.isSelected()) {
+			} else if (publicKeyCryptoSystemType.isSelected()) {
 
-                try {
+				try {
 
-                    String tempHolder = "";
-                    // decrypt the message
-                    String Decryption = pkCryptosys.decrypt(bits.getBytes("UTF-8"));
+					String tempHolder = "";
+					// decrypt the message
+					String Decryption = pkCryptosys.decrypt(bits.getBytes("UTF-8"));
 
 					String result = "";
 					for (byte BYTE : Decryption.getBytes()) {
@@ -733,51 +726,51 @@ public class MasterGUI extends javax.swing.JFrame {
 						result += String.format("%8s", Integer.toBinaryString(tempByte & 0xFF)).replace(' ', '0');
 					}
 
-                    List<String> tempStringList = utils.bitStringToByte.splitEqually(result, 8);
-                    String real = "";
-                    for (String s : tempStringList) {
-                        int charCode = Integer.parseInt(s, 2);
-                        String str = new Character((char)charCode).toString();
-                        real += str;
-                    }
+					List<String> tempStringList = utils.bitStringToByte.splitEqually(result, 8);
+					String real = "";
+					for (String s : tempStringList) {
+						int charCode = Integer.parseInt(s, 2);
+						String str = new Character((char) charCode).toString();
+						real += str;
+					}
 
-                    if (huffmanBtn.isSelected()) {
-                        decryptionText += hc.decode(real, tree);
-                    } else {
+					if (huffmanBtn.isSelected()) {
+						decryptionText += hc.decode(real, tree);
+					} else {
 
 						List<Integer> tempList = new ArrayList<Integer>();
 						tempList = utils.stringSplitter.splitString(real);
 
-                        decryptionText = lzwEnDe.decompress(tempList);
-                    }
+						decryptionText = lzwEnDe.decompress(tempList);
+					}
 
-                } catch (UnsupportedEncodingException ex) {
-                    Logger.getLogger(MasterGUI.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (Exception ex) {
+				} catch (UnsupportedEncodingException ex) {
+					Logger.getLogger(MasterGUI.class.getName()).log(Level.SEVERE, null, ex);
+				} catch (Exception ex) {
 					Logger.getLogger(MasterGUI.class.getName()).log(Level.SEVERE, null, ex);
 				}
 
-            } else {
-                // default
-                decryptionText = simpleEncryptor.decrypt(key, bits);
-				
-                String result = "";
-                for (byte BYTE : decryptionText.getBytes()) {
+			} else {
+				// default
+				decryptionText = simpleEncryptor.decrypt(key, bits);
+
+				String result = "";
+				for (byte BYTE : decryptionText.getBytes()) {
 					byte tempByte = BYTE;
 					result += String.format("%8s", Integer.toBinaryString(tempByte & 0xFF)).replace(' ', '0');
 				}
-				
+
 				List<String> tempStringList = utils.bitStringToByte.splitEqually(result, 8);
 				String real = "";
 				for (String s : tempStringList) {
 					int charCode = Integer.parseInt(s, 2);
-					String str = new Character((char)charCode).toString();
+					String str = new Character((char) charCode).toString();
 					real += str;
 				}
 
 				// clear the decryptionText
 				decryptionText = "";
-				
+
 				// which decoding method?
 				if (huffmanBtn.isSelected()) {
 					decryptionText += hc.decode(real, tree);
@@ -788,8 +781,8 @@ public class MasterGUI extends javax.swing.JFrame {
 
 					decryptionText = lzwEnDe.decompress(tempList);
 				}
-				
-            }
+
+			}
 
 			String text = decryptionText;
 
@@ -809,14 +802,14 @@ public class MasterGUI extends javax.swing.JFrame {
 					fw = new FileWriter(fc.getSelectedFile().getName());
 					// write the file, write to bak then rename
 					if (utils.wordChecker.checkIfFileExists(fc.getSelectedFile().getName())) {
-							File tmpFile = new File(fileName + ".bak");
-							writeFile(tmpFile.getName(), text);
-							tmpFile.renameTo(fc.getSelectedFile());
+						File tmpFile = new File(fileName + ".bak");
+						writeFile(tmpFile.getName(), text);
+						tmpFile.renameTo(fc.getSelectedFile());
 					} else {
-							writeFile(fileName, text);
+						writeFile(fileName, text);
 					}
 				} catch (IOException ex) {
-						Logger.getLogger(MasterGUI.class.getName()).log(Level.SEVERE, null, ex);
+					Logger.getLogger(MasterGUI.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			}
 		}
