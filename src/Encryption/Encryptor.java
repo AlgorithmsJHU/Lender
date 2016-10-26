@@ -2,7 +2,7 @@ package Encryption;
 
 /**
  *
- * @author scout
+ * @author glender
  */
 public interface Encryptor {
 

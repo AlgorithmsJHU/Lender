@@ -5,7 +5,6 @@
  */
 package Encryption;
 
-import Utils.BitStringToByte;
 import Utils.Utilities;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -51,8 +50,6 @@ public class RSA {
 	public final String KEY_DIRECTORY = System.getProperty("user.dir") + "/key/";
 	
 	private Utilities utils = new Utilities();
-	// bit to byte
-	private BitStringToByte bitStringToByte = new BitStringToByte();
 
 	/**
 	 * Generate key which contains a pair of private and public key using 1024

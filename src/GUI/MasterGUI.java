@@ -5,7 +5,6 @@ package GUI;
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-import CompressionRatio.CompressionRatio;
 import Encryption.PKCryptosys;
 import Encryption.RSA;
 import Encryption.SimpleEncryptor;
@@ -14,9 +13,7 @@ import Huffman.HuffmanTree;
 import Huffman.Tree;
 import Huffman.TreeView;
 import LZW.LZW;
-import Utils.BitStringToByte;
-import Utils.StringSplitter;
-import WordChecker.WordChecker;
+import Utils.Utilities;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -57,11 +54,8 @@ public class MasterGUI extends javax.swing.JFrame {
 	SecretKey pk1;
 	SecretKey pk2;
 	
-	// bit to byte
-	BitStringToByte bitStringToByte = new BitStringToByte();
-	
 	// String splitter
-	StringSplitter stringSplitter = new StringSplitter();
+	Utilities utils = new Utilities();
 
 	// Rsa encryption tool
 	private RSA rsaEncryptor = new RSA();
@@ -71,12 +65,6 @@ public class MasterGUI extends javax.swing.JFrame {
 
 	// non-visible FileChooser
 	private javax.swing.JFileChooser fc;
-
-	// compression ratio 
-	private CompressionRatio compressionRatio = new CompressionRatio();
-
-	// word checker
-	private WordChecker wordChecker = new WordChecker();
 
 	// booleans for encryption types
 	private boolean simple = true;
@@ -103,7 +91,7 @@ public class MasterGUI extends javax.swing.JFrame {
 
 		// init components
 		initComponents();
-		initComponentsFromFCImpl();
+		initComponentsFromFC();
 
 		// Check if the pair of keys are present else generate those.
 		if (!rsaEncryptor.areKeysPresent()) {
@@ -141,7 +129,7 @@ public class MasterGUI extends javax.swing.JFrame {
 		}
 	}
 
-	private void initComponentsFromFCImpl() {
+	private void initComponentsFromFC() {
 		fc = new javax.swing.JFileChooser();
 		fc.setFileFilter(new CustomFilter());
 
@@ -533,7 +521,7 @@ public class MasterGUI extends javax.swing.JFrame {
 			if (null != textArea.getText()) {
 
 				// set the compression data
-				compressionRatio.setUncompressed(textArea.getText().length());
+				utils.compressionRatio.setUncompressed(textArea.getText().length());
 
 				String encodedText ="";
 				// which encoding method should we use? 
@@ -551,7 +539,7 @@ public class MasterGUI extends javax.swing.JFrame {
 
 				}
                         
-				compressionRatio.setCompressed(encodedText.length());
+				utils.compressionRatio.setCompressed(encodedText.length());
 
 				String encryptionText = "";
 				// which encryption method should we use? 
@@ -569,7 +557,7 @@ public class MasterGUI extends javax.swing.JFrame {
 							}
 					}
 
-					List<String> tempStringList = bitStringToByte.splitEqually(result, 8);
+					List<String> tempStringList = utils.bitStringToByte.splitEqually(result, 8);
 					String finalResult = "";
 
 					for (String s : tempStringList) {
@@ -605,14 +593,14 @@ public class MasterGUI extends javax.swing.JFrame {
 				fc.setCurrentDirectory(fc.getCurrentDirectory());
 				fw = new FileWriter(fc.getSelectedFile().getName());
 				// write the file
-				if (wordChecker.checkIfFileExists(fc.getSelectedFile().getName())) {
+				if (utils.wordChecker.checkIfFileExists(fc.getSelectedFile().getName())) {
 					// TODO - LENDER - convert from string of byte arrays to bits
 					if (rsaType.isSelected()) {
 						File tmpFile = new File(fc.getSelectedFile().getName() + ".bak");
 						writeFile(tmpFile.getName(), encryptionText);
 						// Display the compression ratio to the user
 						JOptionPane.showMessageDialog(null,
-										"The compression ratio is: " + compressionRatio.getUncompressed() + " / " + compressionRatio.getCompressed() + " = " + compressionRatio.determinCompressionRatio(),
+										"The compression ratio is: " + utils.compressionRatio.getUncompressed() + " / " + utils.compressionRatio.getCompressed() + " = " + utils.compressionRatio.determinCompressionRatio(),
 										"Compression Ratio",
 										JOptionPane.INFORMATION_MESSAGE);
 
@@ -622,7 +610,7 @@ public class MasterGUI extends javax.swing.JFrame {
 						writeFile(tmpFile.getName(), encryptionText);
 						// Display the compression ratio to the user
 						JOptionPane.showMessageDialog(null,
-										"The compression ratio is: " + compressionRatio.getUncompressed() + " / " + compressionRatio.getCompressed() + " = " + compressionRatio.determinCompressionRatio(),
+										"The compression ratio is: " + utils.compressionRatio.getUncompressed() + " / " + utils.compressionRatio.getCompressed() + " = " + utils.compressionRatio.determinCompressionRatio(),
 										"Compression Ratio",
 										JOptionPane.INFORMATION_MESSAGE);
 
@@ -671,7 +659,7 @@ public class MasterGUI extends javax.swing.JFrame {
 					result += String.format("%8s", Integer.toBinaryString(tempByte & 0xFF)).replace(' ', '0');
 				}
 				
-				List<String> tempStringList = bitStringToByte.splitEqually(result, 8);
+				List<String> tempStringList = utils.bitStringToByte.splitEqually(result, 8);
 				String real = "";
 				for (String s : tempStringList) {
 					int charCode = Integer.parseInt(s, 2);
@@ -687,7 +675,7 @@ public class MasterGUI extends javax.swing.JFrame {
 					decryptionText += hc.decode(real, tree);
 				} else {
 					List<Integer> tempList = new ArrayList<Integer>();
-					tempList = stringSplitter.splitString(real);
+					tempList = utils.stringSplitter.splitString(real);
 					decryptionText = lzwEnDe.decompress(tempList);
 				}
 				
@@ -712,7 +700,7 @@ public class MasterGUI extends javax.swing.JFrame {
                     }
                 }
 
-                List<String> tempStringList = bitStringToByte.splitEqually(result, 8);
+                List<String> tempStringList = utils.bitStringToByte.splitEqually(result, 8);
                 String real = "";
                 for (String s : tempStringList) {
                     int charCode = Integer.parseInt(s, 2);
@@ -726,7 +714,7 @@ public class MasterGUI extends javax.swing.JFrame {
                 } else {
 
 					List<Integer> tempList = new ArrayList<Integer>();
-					tempList = stringSplitter.splitString(real);
+					tempList = utils.stringSplitter.splitString(real);
 
                     decryptionText = lzwEnDe.decompress(tempList);
                 }
@@ -745,7 +733,7 @@ public class MasterGUI extends javax.swing.JFrame {
 						result += String.format("%8s", Integer.toBinaryString(tempByte & 0xFF)).replace(' ', '0');
 					}
 
-                    List<String> tempStringList = bitStringToByte.splitEqually(result, 8);
+                    List<String> tempStringList = utils.bitStringToByte.splitEqually(result, 8);
                     String real = "";
                     for (String s : tempStringList) {
                         int charCode = Integer.parseInt(s, 2);
@@ -758,7 +746,7 @@ public class MasterGUI extends javax.swing.JFrame {
                     } else {
 
 						List<Integer> tempList = new ArrayList<Integer>();
-						tempList = stringSplitter.splitString(real);
+						tempList = utils.stringSplitter.splitString(real);
 
                         decryptionText = lzwEnDe.decompress(tempList);
                     }
@@ -779,7 +767,7 @@ public class MasterGUI extends javax.swing.JFrame {
 					result += String.format("%8s", Integer.toBinaryString(tempByte & 0xFF)).replace(' ', '0');
 				}
 				
-				List<String> tempStringList = bitStringToByte.splitEqually(result, 8);
+				List<String> tempStringList = utils.bitStringToByte.splitEqually(result, 8);
 				String real = "";
 				for (String s : tempStringList) {
 					int charCode = Integer.parseInt(s, 2);
@@ -796,7 +784,7 @@ public class MasterGUI extends javax.swing.JFrame {
 				} else {
 
 					List<Integer> tempList = new ArrayList<Integer>();
-					tempList = stringSplitter.splitString(real);
+					tempList = utils.stringSplitter.splitString(real);
 
 					decryptionText = lzwEnDe.decompress(tempList);
 				}
@@ -820,7 +808,7 @@ public class MasterGUI extends javax.swing.JFrame {
 					fc.setCurrentDirectory(fc.getCurrentDirectory());
 					fw = new FileWriter(fc.getSelectedFile().getName());
 					// write the file, write to bak then rename
-					if (wordChecker.checkIfFileExists(fc.getSelectedFile().getName())) {
+					if (utils.wordChecker.checkIfFileExists(fc.getSelectedFile().getName())) {
 							File tmpFile = new File(fileName + ".bak");
 							writeFile(tmpFile.getName(), text);
 							tmpFile.renameTo(fc.getSelectedFile());
