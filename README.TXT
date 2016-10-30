@@ -1,42 +1,22 @@
 Files in project :
-
 ./LICENSE
-./build.xml
+./README.TXT
 ./key/private.key
 ./key/public.key
-./manifest.mf
-./rando.txt
-./src/FileChooser/FileChooser.java
-./src/FileChooser/FileChooser.form
-./src/FileChooser/FCImpl.java
-./src/FileChooser/FCImpl.form
-./src/WordChecker/WordChecker.java
-./src/Encryption/Encryptor.java
-./src/Encryption/SimpleEncryptor.java
-./src/Encryption/RSA.java
-./src/Huffman/MasterGUI.java
-./src/Huffman/MasterGUI.form
-./src/Huffman/TreeView.java
-./src/Huffman/HuffmanTree.java
-./src/Huffman/HuffmanCode.java
-./src/Huffman/Tree.java
-./src/Huffman/Heap.java
-./src/CompressionRatio/CompressionRatio.java
-./src/scripts/build
-./src/scripts/textFile.txt
-./src/scripts/backup
-./src/scripts/rando.txt
 ./src/scripts/createRandomWordFile.pl
-./src/scripts/backup.txt
+./src/srcipts/rando.txt
+./src/Encryption/SimpleEncryptor.java
+./src/Encryption/Encryptor.java
+./src/Encryption/PKCryptosys.java
+./src/Encryption/RSA.java
+./src/Huffman/Heap.java
+./src/Huffman/HuffmanCode.java
+./src/Huffman/HuffmanTree.java
+./src/Huffman/Tree.java
+./src/Huffman/TreeView.java
 ./src/LZW/LZW.java
-./src/Utils/BitStringToByte.java
 ./src/Utils/Utilities.java
-./textFile.txt
-./build/built-jar.properties
-./dist/README.TXT
-./dist/LenderPA1.jar
-./build.sh
-./README.TXT
+./src/GUI/MasterGUI.java
 
 Java Version is 1.8, as detailed below.
 
@@ -52,6 +32,7 @@ As of now, I am building and running in NetBeans because my employer heavily use
 You should be able to generate a file with the script located at ./src/scripts/createRandomWordFile.pl. To do so, do the following: 
 
 perl createRandomWordFile.pl > FILENAME.txt
+This file sholud be used in the application.
 
 The application should let you do the following: 
 
@@ -63,7 +44,6 @@ The application should let you do the following:
 6. Enter text to be encode.
 7. Enter binary to be decode (from the input you provided in 6)
  
-
 
 ###############################################################################
 ###############################################################################
