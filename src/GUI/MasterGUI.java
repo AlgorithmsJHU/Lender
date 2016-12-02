@@ -16,6 +16,7 @@ import LZW.LZW;
 import Utils.Utilities;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
@@ -81,7 +82,7 @@ public class MasterGUI extends javax.swing.JFrame {
 
 	// encoding / decoding for LZW
 	private LZW lzwEnDe = new LZW();
-
+	
 	ArrayList<byte[]> tempByteList = new ArrayList<byte[]>();
 
 	/**
@@ -157,12 +158,6 @@ public class MasterGUI extends javax.swing.JFrame {
 		// enable the first selection upon start
 		codingType.setSelected(huffmanBtn.getModel(), huffman);
 		huffmanBtn.setSelected(huffman);
-
-		// TODO -- LENDER -- make these work properly.
-		lzwBtn.setEnabled(false);
-		textBtn.setEnabled(false);
-		binaryBtn.setEnabled(false);
-		publicKeyCryptoSystemType.setEnabled(false);
 
 	}
 
@@ -471,7 +466,9 @@ public class MasterGUI extends javax.swing.JFrame {
 			File file = fc.getSelectedFile();
 			try {
 				// What to do with the file (i.e. display it in a textArea)
-				textArea.read(new FileReader(file.getAbsolutePath()), null);
+				textArea.setText(readFile(file.getAbsolutePath()));
+
+				//textArea.read(new FileReader(file.getAbsolutePath()), null);
 
 			} catch (IOException ex) {
 				System.out.println("problem accessing file" + file.getAbsolutePath());
@@ -489,11 +486,20 @@ public class MasterGUI extends javax.swing.JFrame {
 
 				// set the current directory
 				fc.setCurrentDirectory(fc.getCurrentDirectory());
-				FileWriter fw = new FileWriter(fc.getSelectedFile().getName());
+				
+				if (textBtn.isSelected()) {
+					FileWriter fw = new FileWriter(fc.getSelectedFile().getName());
 
-				// read the file and save to the file name the user chose
-				String content = textArea.getText();
-				writeFile(fileName, content);
+					// read the file and save to the file name the user chose
+					String content = textArea.getText();
+					writeFile(fileName, content);
+				} else {
+					FileWriter fw = new FileWriter(fc.getSelectedFile().getName());
+
+					// read the file and save to the file name the user chose
+					String content = textArea.getText();
+					writeFile(fileName, content, true);
+				}
 
 			} catch (IOException ex) {
 				Logger.getLogger(MasterGUI.class.getName()).log(Level.SEVERE, null, ex);
@@ -590,7 +596,18 @@ public class MasterGUI extends javax.swing.JFrame {
 					// TODO - LENDER - convert from string of byte arrays to bits
 					if (rsaType.isSelected()) {
 						File tmpFile = new File(fc.getSelectedFile().getName() + ".bak");
-						writeFile(tmpFile.getName(), encryptionText);
+						
+						if (textBtn.isSelected()) {
+							writeFile(tmpFile.getName(), encryptionText);
+						} else {
+							try {
+								
+								writeFile(tmpFile.getName(), encryptionText, true);
+
+							} catch (Exception ex) {
+								Logger.getLogger(MasterGUI.class.getName()).log(Level.SEVERE, null, ex);
+							}
+						}
 						// Display the compression ratio to the user
 						JOptionPane.showMessageDialog(null,
 								"The compression ratio is: " + utils.compressionRatio.getUncompressed() + " / " + utils.compressionRatio.getCompressed() + " = " + utils.compressionRatio.determinCompressionRatio(),
@@ -600,7 +617,13 @@ public class MasterGUI extends javax.swing.JFrame {
 						tmpFile.renameTo(fc.getSelectedFile());
 					} else {
 						File tmpFile = new File(fc.getSelectedFile().getName() + ".bak");
-						writeFile(tmpFile.getName(), encryptionText);
+						
+						if (textBtn.isSelected()) {
+							writeFile(tmpFile.getName(), encryptionText);
+						} else {
+							writeFile(tmpFile.getName(), encryptionText, true);
+
+						}
 						// Display the compression ratio to the user
 						JOptionPane.showMessageDialog(null,
 								"The compression ratio is: " + utils.compressionRatio.getUncompressed() + " / " + utils.compressionRatio.getCompressed() + " = " + utils.compressionRatio.determinCompressionRatio(),
@@ -800,13 +823,24 @@ public class MasterGUI extends javax.swing.JFrame {
 					// set the current directory
 					fc.setCurrentDirectory(fc.getCurrentDirectory());
 					fw = new FileWriter(fc.getSelectedFile().getName());
+					
 					// write the file, write to bak then rename
 					if (utils.wordChecker.checkIfFileExists(fc.getSelectedFile().getName())) {
 						File tmpFile = new File(fileName + ".bak");
-						writeFile(tmpFile.getName(), text);
+						
+						if (textBtn.isSelected()) {
+							writeFile(tmpFile.getName(), text);
+						} else {
+							writeFile(tmpFile.getName(), text, true);
+						}
+						
 						tmpFile.renameTo(fc.getSelectedFile());
 					} else {
-						writeFile(fileName, text);
+						if (textBtn.isSelected()) {
+							writeFile(fileName, text);
+						} else {
+							writeFile(fileName, text, true);
+						}
 					}
 				} catch (IOException ex) {
 					Logger.getLogger(MasterGUI.class.getName()).log(Level.SEVERE, null, ex);
@@ -839,6 +873,38 @@ public class MasterGUI extends javax.swing.JFrame {
 			out.write(text);
 		}
 	}
+	/**
+	 * Save the given text to the given filename.
+	 *
+	 * @param canonicalFilename Like /home/garrett/git/Code/blah.txt
+	 * @param text All the text you want to save to the file as one String.
+	 * @throws IOException
+	 */
+	public static void writeFile(String canonicalFilename, String text, boolean binary) throws IOException {
+		File file = new File(canonicalFilename);
+		if (!binary) {
+			try (BufferedWriter out = new BufferedWriter(new FileWriter(file))) {
+				out.write(text);
+			}
+		} else {
+			try (BufferedWriter out = new BufferedWriter(new FileWriter(file))) {
+				byte[] bytes = text.getBytes();
+				StringBuilder stringBuilder = new StringBuilder();
+				
+				for (byte b : bytes) {
+					int value = b;
+					
+					for (int index = 0; index < 8; index++) {
+						stringBuilder.append((value & 128) == 0 ? 0 : 1);
+						value <<= 1;
+					}
+					
+				}
+				
+				out.write(stringBuilder.toString());
+			}
+		}
+	}
 
 	/**
 	 *
@@ -847,6 +913,7 @@ public class MasterGUI extends javax.swing.JFrame {
 	 * @throws IOException
 	 */
 	public String readFile(String fileName) throws IOException {
+		
 		try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
 			StringBuilder sb = new StringBuilder();
 			String line = br.readLine();
@@ -856,7 +923,17 @@ public class MasterGUI extends javax.swing.JFrame {
 				sb.append("\n");
 				line = br.readLine();
 			}
-			return sb.toString();
+			if (textBtn.isSelected()) {
+				return sb.toString();
+			} else {
+				String output = "";
+				for (int index = 0; index <= sb.toString().length() - 8; index += 8) {
+					int character = Integer.parseInt(sb.toString().substring(index, index + 8), 2);
+					output += (char) character;
+				}
+				
+				return output;
+			}
 		}
 	}
 

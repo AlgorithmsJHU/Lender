@@ -8,8 +8,7 @@ package Encryption;
  */
 public class SimpleEncryptor implements Encryptor {
 
-	public SimpleEncryptor() {
-	}
+	public SimpleEncryptor() {}
 
 	/**
 	 *
