@@ -24,5 +24,3 @@ close WORDS;
 my @shuffled_words = shuffle(@words);
 
 print for @shuffled_words[0 .. $numwords - 1];
-
-#system("/bin/bash removal.sh");

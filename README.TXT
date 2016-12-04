@@ -7,7 +7,6 @@ Files in project :
 ./src/srcipts/rando.txt
 ./src/Encryption/SimpleEncryptor.java
 ./src/Encryption/Encryptor.java
-./src/Encryption/PKCryptosys.java
 ./src/Encryption/RSA.java
 ./src/Huffman/Heap.java
 ./src/Huffman/HuffmanCode.java
@@ -43,6 +42,8 @@ The application should let you do the following:
 5. Decode and decrypt a file with the Simple Encryption and RSA methods.
 6. Enter text to be encode.
 7. Enter binary to be decode (from the input you provided in 6)
+8. Request Binary input and output.
+    8.1 This will save the files as *.bin.
  
 
 ###############################################################################
