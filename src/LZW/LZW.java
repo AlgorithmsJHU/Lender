@@ -5,7 +5,6 @@
  */
 package LZW;
 
-import Encryption.PKCryptosys;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,8 +16,6 @@ import java.util.Map;
  */
 public class LZW {
 
-	private PKCryptosys pk = new PKCryptosys();
-	
     /** Compress a string to a list of output symbols.
      * @param uncompressed
      * @return  

@@ -8,7 +8,7 @@ use List::Util qw/shuffle/;
 my $wordlist = '/usr/share/dict/words';
 
 my $length = 7;
-my $numwords = 100;
+my $numwords = 10;
 
 my @words;
 
@@ -25,4 +25,4 @@ my @shuffled_words = shuffle(@words);
 
 print for @shuffled_words[0 .. $numwords - 1];
 
-system("/bin/bash removal.sh");
+#system("/bin/bash removal.sh");

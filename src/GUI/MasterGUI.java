@@ -5,7 +5,6 @@ package GUI;
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-import Encryption.PKCryptosys;
 import Encryption.RSA;
 import Encryption.SimpleEncryptor;
 import Huffman.HuffmanCode;
@@ -25,6 +24,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.ArrayList;
@@ -49,11 +49,6 @@ public class MasterGUI extends javax.swing.JFrame {
 	// Simple encryption key and tool
 	private String key = "simpleKey";
 	private SimpleEncryptor simpleEncryptor = new SimpleEncryptor();
-
-	// PublicKey encryption tool and keys
-	private PKCryptosys pkCryptosys = new PKCryptosys();
-	SecretKey pk1;
-	SecretKey pk2;
 
 	// String splitter
 	Utilities utils = new Utilities();
@@ -82,6 +77,8 @@ public class MasterGUI extends javax.swing.JFrame {
 
 	// encoding / decoding for LZW
 	private LZW lzwEnDe = new LZW();
+	private List<Integer> lzwList = new ArrayList<Integer>();
+	private List<Integer> lzwCharsOnlyList = new ArrayList<Integer>();
 	
 	ArrayList<byte[]> tempByteList = new ArrayList<byte[]>();
 
@@ -108,7 +105,7 @@ public class MasterGUI extends javax.swing.JFrame {
 		// Decrypt the cipher text using the private key.
 		inputStream = new ObjectInputStream(new FileInputStream(rsaEncryptor.KEY_DIRECTORY + rsaEncryptor.PRIVATE_KEY_FILE));
 		privateKey = (PrivateKey) inputStream.readObject();
-
+		
 	}
 
 	/**
@@ -137,7 +134,6 @@ public class MasterGUI extends javax.swing.JFrame {
 		// add the buttons to the group
 		encryptionType.add(simpleEncryptionType);
 		encryptionType.add(rsaType);
-		encryptionType.add(publicKeyCryptoSystemType);
 
 		// add the buttons to the group
 		IOType.add(textBtn);
@@ -184,7 +180,6 @@ public class MasterGUI extends javax.swing.JFrame {
         decodeDecrypt = new javax.swing.JButton();
         simpleEncryptionType = new javax.swing.JRadioButton();
         rsaType = new javax.swing.JRadioButton();
-        publicKeyCryptoSystemType = new javax.swing.JRadioButton();
         textBtn = new javax.swing.JRadioButton();
         binaryBtn = new javax.swing.JRadioButton();
         jLabel1 = new javax.swing.JLabel();
@@ -257,13 +252,6 @@ public class MasterGUI extends javax.swing.JFrame {
         rsaType.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 rsaTypeActionPerformed(evt);
-            }
-        });
-
-        publicKeyCryptoSystemType.setText("Public-Key Cryptosystem");
-        publicKeyCryptoSystemType.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                publicKeyCryptoSystemTypeActionPerformed(evt);
             }
         });
 
@@ -351,9 +339,7 @@ public class MasterGUI extends javax.swing.JFrame {
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addGroup(layout.createSequentialGroup()
                                         .addComponent(rsaType)
-                                        .addGap(18, 18, 18)
-                                        .addComponent(publicKeyCryptoSystemType)
-                                        .addGap(39, 39, 39)
+                                        .addGap(248, 248, 248)
                                         .addComponent(jLabel2)
                                         .addGap(3, 3, 3)
                                         .addComponent(textBtn)
@@ -376,7 +362,6 @@ public class MasterGUI extends javax.swing.JFrame {
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(simpleEncryptionType)
                         .addComponent(rsaType)
-                        .addComponent(publicKeyCryptoSystemType)
                         .addComponent(textBtn)
                         .addComponent(binaryBtn)
                         .addComponent(jLabel1)
@@ -492,13 +477,17 @@ public class MasterGUI extends javax.swing.JFrame {
 
 					// read the file and save to the file name the user chose
 					String content = textArea.getText();
+					
 					writeFile(fileName, content);
 				} else {
 					FileWriter fw = new FileWriter(fc.getSelectedFile().getName());
 
 					// read the file and save to the file name the user chose
 					String content = textArea.getText();
-					writeFile(fileName, content, true);
+					String newName = stripFileExtension(fileName);
+					newName += ".bin";
+					writeFile(newName, content, true);
+
 				}
 
 			} catch (IOException ex) {
@@ -528,13 +517,15 @@ public class MasterGUI extends javax.swing.JFrame {
 					encodedText = encode(textArea.getText());
 				} else {
 
-					List<Integer> lzwList = new ArrayList<Integer>();
 					lzwList = lzwEnDe.compress(textArea.getText());
+					
+					// Filter out newlines
+					lzwList.stream().filter((integer) -> (integer != 10)).forEach((integer) -> {
+						lzwCharsOnlyList.add(integer);
+					});
 
 					// create the encoded string from the encoded list of integers
-					for (Integer integer : lzwList) {
-						encodedText += integer.toString();
-					}
+					encodedText = lzwList.stream().map((integer) -> integer.toString()).reduce(encodedText, String::concat);
 
 				}
 
@@ -570,16 +561,6 @@ public class MasterGUI extends javax.swing.JFrame {
 
 					encryptionText = finalResult;
 
-				} else if (publicKeyCryptoSystemType.isSelected()) {
-
-					// encrypt the message
-					byte[] Encryption = pkCryptosys.encrypt(encodedText);
-
-					// add the bytes to the encryption text
-					for (Byte b : Encryption) {
-						encryptionText += b.toString();
-					}
-
 				} else {
 					// default to the simpleEncryptor
 					encryptionText = simpleEncryptor.encrypt(key, encodedText);
@@ -593,16 +574,20 @@ public class MasterGUI extends javax.swing.JFrame {
 				fw = new FileWriter(fc.getSelectedFile().getName());
 				// write the file
 				if (utils.wordChecker.checkIfFileExists(fc.getSelectedFile().getName())) {
-					// TODO - LENDER - convert from string of byte arrays to bits
+					
 					if (rsaType.isSelected()) {
 						File tmpFile = new File(fc.getSelectedFile().getName() + ".bak");
 						
 						if (textBtn.isSelected()) {
 							writeFile(tmpFile.getName(), encryptionText);
+							tmpFile.renameTo(fc.getSelectedFile());
 						} else {
 							try {
 								
 								writeFile(tmpFile.getName(), encryptionText, true);
+								String newName = stripFileExtension(fc.getSelectedFile().getName());
+								newName += ".bin";
+								tmpFile.renameTo(new File(newName));
 
 							} catch (Exception ex) {
 								Logger.getLogger(MasterGUI.class.getName()).log(Level.SEVERE, null, ex);
@@ -614,7 +599,7 @@ public class MasterGUI extends javax.swing.JFrame {
 								"Compression Ratio",
 								JOptionPane.INFORMATION_MESSAGE);
 
-						tmpFile.renameTo(fc.getSelectedFile());
+						
 					} else {
 						File tmpFile = new File(fc.getSelectedFile().getName() + ".bak");
 						
@@ -677,10 +662,12 @@ public class MasterGUI extends javax.swing.JFrame {
 
 				List<String> tempStringList = utils.bitStringToByte.splitEqually(result, 8);
 				String real = "";
+				String realLZW = "";
 				for (String s : tempStringList) {
 					int charCode = Integer.parseInt(s, 2);
 					String str = new Character((char) charCode).toString();
 					real += str;
+					realLZW += str + " ";
 				}
 
 				// clear the decryptionText
@@ -690,9 +677,7 @@ public class MasterGUI extends javax.swing.JFrame {
 				if (huffmanBtn.isSelected()) {
 					decryptionText += hc.decode(real, tree);
 				} else {
-					List<Integer> tempList = new ArrayList<Integer>();
-					tempList = utils.stringSplitter.splitString(real);
-					decryptionText = lzwEnDe.decompress(tempList);
+					decryptionText = lzwEnDe.decompress(lzwList);
 				}
 
 			} else if (rsaType.isSelected()) {
@@ -728,49 +713,7 @@ public class MasterGUI extends javax.swing.JFrame {
 				if (huffmanBtn.isSelected()) {
 					decryptionText += hc.decode(real, tree);
 				} else {
-
-					List<Integer> tempList = new ArrayList<Integer>();
-					tempList = utils.stringSplitter.splitString(real);
-
-					decryptionText = lzwEnDe.decompress(tempList);
-				}
-
-			} else if (publicKeyCryptoSystemType.isSelected()) {
-
-				try {
-
-					String tempHolder = "";
-					// decrypt the message
-					String Decryption = pkCryptosys.decrypt(bits.getBytes("UTF-8"));
-
-					String result = "";
-					for (byte BYTE : Decryption.getBytes()) {
-						byte tempByte = BYTE;
-						result += String.format("%8s", Integer.toBinaryString(tempByte & 0xFF)).replace(' ', '0');
-					}
-
-					List<String> tempStringList = utils.bitStringToByte.splitEqually(result, 8);
-					String real = "";
-					for (String s : tempStringList) {
-						int charCode = Integer.parseInt(s, 2);
-						String str = new Character((char) charCode).toString();
-						real += str;
-					}
-
-					if (huffmanBtn.isSelected()) {
-						decryptionText += hc.decode(real, tree);
-					} else {
-
-						List<Integer> tempList = new ArrayList<Integer>();
-						tempList = utils.stringSplitter.splitString(real);
-
-						decryptionText = lzwEnDe.decompress(tempList);
-					}
-
-				} catch (UnsupportedEncodingException ex) {
-					Logger.getLogger(MasterGUI.class.getName()).log(Level.SEVERE, null, ex);
-				} catch (Exception ex) {
-					Logger.getLogger(MasterGUI.class.getName()).log(Level.SEVERE, null, ex);
+					decryptionText = lzwEnDe.decompress(lzwList);
 				}
 
 			} else {
@@ -798,11 +741,7 @@ public class MasterGUI extends javax.swing.JFrame {
 				if (huffmanBtn.isSelected()) {
 					decryptionText += hc.decode(real, tree);
 				} else {
-
-					List<Integer> tempList = new ArrayList<Integer>();
-					tempList = utils.stringSplitter.splitString(real);
-
-					decryptionText = lzwEnDe.decompress(tempList);
+					decryptionText = lzwEnDe.decompress(lzwList);
 				}
 
 			}
@@ -832,6 +771,9 @@ public class MasterGUI extends javax.swing.JFrame {
 							writeFile(tmpFile.getName(), text);
 						} else {
 							writeFile(tmpFile.getName(), text, true);
+							String newName = stripFileExtension(fc.getSelectedFile().getName());
+							newName += ".bin";
+							tmpFile.renameTo(new File(newName));
 						}
 						
 						tmpFile.renameTo(fc.getSelectedFile());
@@ -839,6 +781,8 @@ public class MasterGUI extends javax.swing.JFrame {
 						if (textBtn.isSelected()) {
 							writeFile(fileName, text);
 						} else {
+							String newName = stripFileExtension(fc.getSelectedFile().getName());
+							newName += ".bin";
 							writeFile(fileName, text, true);
 						}
 					}
@@ -856,10 +800,6 @@ public class MasterGUI extends javax.swing.JFrame {
 		// TODO add your handling code here:
     }//GEN-LAST:event_rsaTypeActionPerformed
 
-    private void publicKeyCryptoSystemTypeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_publicKeyCryptoSystemTypeActionPerformed
-		// TODO add your handling code here:
-    }//GEN-LAST:event_publicKeyCryptoSystemTypeActionPerformed
-
 	/**
 	 * Save the given text to the given filename.
 	 *
@@ -873,6 +813,20 @@ public class MasterGUI extends javax.swing.JFrame {
 			out.write(text);
 		}
 	}
+	
+	/**
+	 * Strips extension from the file name.
+	 * @param fileName
+	 * @return 
+	 */
+	public static String stripFileExtension(String fileName) {
+		int dotInd = fileName.lastIndexOf('.');
+
+		// if dot is in the first position,
+		// we are dealing with a hidden file rather than an extension
+		return (dotInd > 0) ? fileName.substring(0, dotInd) : fileName;
+	}
+	
 	/**
 	 * Save the given text to the given filename.
 	 *
@@ -881,6 +835,7 @@ public class MasterGUI extends javax.swing.JFrame {
 	 * @throws IOException
 	 */
 	public static void writeFile(String canonicalFilename, String text, boolean binary) throws IOException {
+		
 		File file = new File(canonicalFilename);
 		if (!binary) {
 			try (BufferedWriter out = new BufferedWriter(new FileWriter(file))) {
@@ -996,7 +951,6 @@ public class MasterGUI extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JRadioButton lzwBtn;
     private javax.swing.JMenuBar menuBar;
-    private javax.swing.JRadioButton publicKeyCryptoSystemType;
     private javax.swing.JRadioButton rsaType;
     private javax.swing.JMenuItem save;
     private javax.swing.JRadioButton simpleEncryptionType;

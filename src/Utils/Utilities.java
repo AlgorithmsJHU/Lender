@@ -118,7 +118,7 @@ public class Utilities {
 
 			ArrayList<Integer> list = new ArrayList<Integer>();
 			List<String> finalString = new ArrayList<String>();
-
+			
 			int letterCount = 0;
 			String ans = "";
 			String check = "";
@@ -130,12 +130,13 @@ public class Utilities {
 
 				check += str.charAt(index);
 
-				if (check.length() == 3) {
+				/*if (check.length() == 3) {
 					if (check.charAt(0) == '0') {
 						System.out.println("LENDER -- removing leading zero");
 						check = check.replaceFirst("0", "");
 					}
 				}
+				*/
 
 
 				if (check.length() >= 2 && check.length() <= 3) {
@@ -152,7 +153,7 @@ public class Utilities {
 					} else {
 
 						// determine if the string is in the ascii new line list
-						if (ascii.asciiNew.contains(Integer.valueOf(check)) && letterCount > LENGTH - 1) {
+						if (ascii.asciiNew.contains(Integer.valueOf(check)) && letterCount >= LENGTH) {
 
 							// add the value to our list
 							letterCount = 0;
@@ -274,9 +275,9 @@ public class Utilities {
 			}
 
 			// put the enum values into the arrayList
-			//for (ascii_numbers an : ascii_numbers.values()) {
-			//	ascii.add(an.id);
-			//}
+			for (ascii_numbers an : ascii_numbers.values()) {
+				ascii.add(an.id);
+			}
 
 			// put the enum values into the arrayList
 			for (ascii_new_line anl : ascii_new_line.values()) {
