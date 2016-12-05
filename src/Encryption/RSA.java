@@ -71,8 +71,16 @@ public class RSA {
 	 */
 	public final String KEY_DIRECTORY = System.getProperty("user.dir") + "/key/";
 	
+	/**
+	 * Utilities.
+	 */
 	private Utilities utils = new Utilities();
-
+	
+	/**
+	 * Are the keys set?
+	 */
+	private boolean keysSet = false;
+	
 	/**
 	 * Generate key which contains a pair of private and public key using 1024
 	 * bytes. Store the set of keys in Private.key and Public.key files.
@@ -116,6 +124,14 @@ public class RSA {
 		} catch (NoSuchAlgorithmException | IOException e) {
 		}
 
+	}
+	
+	public boolean getKeysSet() {
+		return this.keysSet;
+	}
+	
+	public void setKeysSet(boolean b) {
+		this.keysSet = b;
 	}
 
 	/**

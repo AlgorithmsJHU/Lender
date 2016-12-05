@@ -5,6 +5,7 @@ package GUI;
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+import Encryption.PrivatePublicKey;
 import Encryption.RSA;
 import Encryption.SimpleEncryptor;
 import Huffman.HuffmanCode;
@@ -15,23 +16,28 @@ import LZW.LZW;
 import Utils.Utilities;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.crypto.SecretKey;
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.IvParameterSpec;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
@@ -80,6 +86,13 @@ public class MasterGUI extends javax.swing.JFrame {
 	private List<Integer> lzwList = new ArrayList<Integer>();
 	private List<Integer> lzwCharsOnlyList = new ArrayList<Integer>();
 	
+	// public-key crypto
+	private PrivatePublicKey ppk = new PrivatePublicKey();
+	private String encrypted;
+	private Key k;
+	private SecureRandom random;
+	private IvParameterSpec iv;
+	
 	ArrayList<byte[]> tempByteList = new ArrayList<byte[]>();
 
 	/**
@@ -96,6 +109,7 @@ public class MasterGUI extends javax.swing.JFrame {
 			// Method generates a pair of keys using the RSA algorithm and stores it
 			// in their respective files
 			rsaEncryptor.generateKey();
+			rsaEncryptor.setKeysSet(true);
 		}
 
 		// Encrypt the string using the public key
@@ -105,6 +119,14 @@ public class MasterGUI extends javax.swing.JFrame {
 		// Decrypt the cipher text using the private key.
 		inputStream = new ObjectInputStream(new FileInputStream(rsaEncryptor.KEY_DIRECTORY + rsaEncryptor.PRIVATE_KEY_FILE));
 		privateKey = (PrivateKey) inputStream.readObject();
+		
+		try {
+			k = ppk.generateKey();
+		} catch (NoSuchAlgorithmException ex) {
+			Logger.getLogger(MasterGUI.class.getName()).log(Level.SEVERE, null, ex);
+		}
+		random = new SecureRandom();
+		iv = new IvParameterSpec(random.generateSeed(16));
 		
 	}
 
@@ -134,6 +156,7 @@ public class MasterGUI extends javax.swing.JFrame {
 		// add the buttons to the group
 		encryptionType.add(simpleEncryptionType);
 		encryptionType.add(rsaType);
+		encryptionType.add(pkcryptoType);
 
 		// add the buttons to the group
 		IOType.add(textBtn);
@@ -187,6 +210,7 @@ public class MasterGUI extends javax.swing.JFrame {
         huffmanBtn = new javax.swing.JRadioButton();
         lzwBtn = new javax.swing.JRadioButton();
         jLabel3 = new javax.swing.JLabel();
+        pkcryptoType = new javax.swing.JRadioButton();
         menuBar = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         Open = new javax.swing.JMenuItem();
@@ -269,6 +293,8 @@ public class MasterGUI extends javax.swing.JFrame {
 
         jLabel3.setText("Encode / Decode Type:");
 
+        pkcryptoType.setText("Public-Key Crypto");
+
         jMenu1.setText("File");
 
         Open.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.event.InputEvent.CTRL_MASK));
@@ -339,7 +365,9 @@ public class MasterGUI extends javax.swing.JFrame {
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addGroup(layout.createSequentialGroup()
                                         .addComponent(rsaType)
-                                        .addGap(248, 248, 248)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(pkcryptoType)
+                                        .addGap(86, 86, 86)
                                         .addComponent(jLabel2)
                                         .addGap(3, 3, 3)
                                         .addComponent(textBtn)
@@ -365,7 +393,8 @@ public class MasterGUI extends javax.swing.JFrame {
                         .addComponent(textBtn)
                         .addComponent(binaryBtn)
                         .addComponent(jLabel1)
-                        .addComponent(jLabel2))
+                        .addComponent(jLabel2)
+                        .addComponent(pkcryptoType))
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(decodeDecrypt, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(encodeEncrypt, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)))
@@ -561,6 +590,9 @@ public class MasterGUI extends javax.swing.JFrame {
 
 					encryptionText = finalResult;
 
+				} else if (pkcryptoType.isSelected()) {
+					encryptionText = ppk.encrypt(encodedText, k, iv);
+					encrypted = encryptionText;
 				} else {
 					// default to the simpleEncryptor
 					encryptionText = simpleEncryptor.encrypt(key, encodedText);
@@ -716,6 +748,25 @@ public class MasterGUI extends javax.swing.JFrame {
 					decryptionText = lzwEnDe.decompress(lzwList);
 				}
 
+			} else if (pkcryptoType.isSelected()) {
+				
+				String decrypted = "";
+				try {
+					decrypted = ppk.decrypt(encrypted, k, iv);
+				} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException | IOException | InvalidAlgorithmParameterException ex) {
+					Logger.getLogger(MasterGUI.class.getName()).log(Level.SEVERE, null, ex);
+				}
+
+				String decrypt = decrypted;
+
+				// which decoding method?
+				if (huffmanBtn.isSelected()) {
+					decryptionText += hc.decode(decrypt, tree);
+				} else {
+					decryptionText = lzwEnDe.decompress(lzwList);
+				}
+				
+				
 			} else {
 				// default
 				decryptionText = simpleEncryptor.decrypt(key, bits);
@@ -951,6 +1002,7 @@ public class MasterGUI extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JRadioButton lzwBtn;
     private javax.swing.JMenuBar menuBar;
+    private javax.swing.JRadioButton pkcryptoType;
     private javax.swing.JRadioButton rsaType;
     private javax.swing.JMenuItem save;
     private javax.swing.JRadioButton simpleEncryptionType;

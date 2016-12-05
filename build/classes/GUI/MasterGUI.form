@@ -116,7 +116,9 @@
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Group type="102" attributes="0">
                                       <Component id="rsaType" min="-2" max="-2" attributes="0"/>
-                                      <EmptySpace min="-2" pref="248" max="-2" attributes="0"/>
+                                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                                      <Component id="pkcryptoType" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace min="-2" pref="86" max="-2" attributes="0"/>
                                       <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
                                       <EmptySpace min="-2" pref="3" max="-2" attributes="0"/>
                                       <Component id="textBtn" min="-2" max="-2" attributes="0"/>
@@ -152,6 +154,7 @@
                       <Component id="binaryBtn" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="jLabel1" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="jLabel2" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="pkcryptoType" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="decodeDecrypt" alignment="3" max="32767" attributes="0"/>
@@ -308,6 +311,11 @@
     <Component class="javax.swing.JLabel" name="jLabel3">
       <Properties>
         <Property name="text" type="java.lang.String" value="Encode / Decode Type:"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JRadioButton" name="pkcryptoType">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Public-Key Crypto"/>
       </Properties>
     </Component>
   </SubComponents>
